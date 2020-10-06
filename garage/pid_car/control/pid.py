@@ -29,6 +29,10 @@
 More information about PID Controller: http://en.wikipedia.org/wiki/PID_controller
 """
 import time
+from datetime import datetime
+from matplotlib import pyplot
+from matplotlib.animation import FuncAnimation
+
 
 class PID:
     """PID Controller
@@ -47,6 +51,12 @@ class PID:
 
         self.clear()
 
+    def update_ani(self, frame):
+        self.line.set_data(self.x_data, self.y_data)
+        #self.figure.gca().relim()
+        #self.figure.gca().autoscale_view()
+        return self.line,
+
     def clear(self):
         """Clears PID computations and coefficients"""
         self.SetPoint = 0.0
@@ -55,24 +65,39 @@ class PID:
         self.ITerm = 0.0
         self.DTerm = 0.0
         self.last_error = 0.0
-
+                
+        pyplot.ion()
+        self.x_data, self.y_data = [], []
+        self.figure = pyplot.figure()
+        self.line, = pyplot.plot(self.x_data, self.y_data, '-')
+        #self.ln, = plt.plot([], [], 'ro')
+        animation = FuncAnimation(self.figure, self.update_ani, interval=10)
+        pyplot.xlabel('sample_time')  
+        pyplot.ylabel('delta_error')  
+        pyplot.title(self.name)
+                
         # Windup Guard
         self.int_error = 0.0
         self.windup_guard = 20.0
 
         self.output = 0.0
-
+    
+    def show(self):
+        print('.')
+        #pyplot.show()
+    
     def update(self, feedback_value):
         """Calculates PID value for given reference feedback
            math: u(t) = K_p e(t) + K_i \int_{0}^{t} e(t)dt + K_d {de}/{dt}
         """
         error = self.SetPoint - feedback_value
-
+        
         self.current_time = time.time()
         delta_time = self.current_time - self.last_time
         delta_error = error - self.last_error
 
         if (delta_time >= self.sample_time):
+            
             self.PTerm = self.Kp * error
             self.ITerm += error * delta_time
 
@@ -90,7 +115,18 @@ class PID:
             self.last_error = error
             #print("P: " + delta_error + " | I ("+self.Ki+"):" +self.ITerm + " | D ("+self.Kd+"):" + self.DTerm)
             self.output = self.PTerm + (self.Ki * self.ITerm) + (self.Kd * self.DTerm)
-            print("%s -- out: %d P: %d | I (%d): %d | D (%d): %d" % (self.name, self.output, self.PTerm, self.Ki, self.ITerm, self.Kd, self.DTerm) )
+            print("%s out: %d - %4.3f ==== P(%4.3f): %4.3f | I (%4.3f): %4.3f | D (%4.3f): %4.3f" % (self.name, self.current_time, self.output, self.Kp, self.PTerm, self.Ki, self.ITerm, self.Kd, self.DTerm) )
+            #time.sleep(1)
+            self.x_data.append(self.current_time)
+            self.y_data.append(error)
+            #pyplot.scatter(self.current_time, self.output)
+            self.line, = pyplot.plot(self.x_data, self.y_data, '-')
+            #limit 50
+            self.x_data = self.x_data[-50:]
+            self.y_data = self.y_data[-50:]
+            pyplot.draw() 
+            pyplot.pause(0.01) #is necessary for the plot to update for some reason
+            #pyplot.show()
 
     def setKp(self, proportional_gain):
         """Determines how aggressively the PID reacts to the current error with setting Proportional Gain"""

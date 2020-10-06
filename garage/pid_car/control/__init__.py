@@ -77,7 +77,7 @@ class PIDThrottleControl(PIDControl):
         self.pid_controller.update(car.state.speed)
         output = self.pid_controller.output
         output = self.limitOutput(output)
-        print("throttle: speed=" + str(car.state.speed) + " output: " + str(output))
+        #print("throttle: speed=" + str(car.state.speed) + " output: " + str(output))
         # Define throttle and brake
         if output < 0.0:
             car.controls.throttle = 0.0
@@ -119,8 +119,9 @@ class PIDSteeringControl(PIDControl):
                 delta_error *= -1
 
             # Update PID and set controls
-            print("steering: delta=" + str(delta_error))
+            #print("steering: delta=" + str(delta_error))
             self.pid_controller.update(delta_error)
+            self.pid_controller.show()
             output = self.pid_controller.output
             output = self.limitOutput(output)
             car.controls.steering = output
