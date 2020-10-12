@@ -66,15 +66,15 @@ class PID:
         self.DTerm = 0.0
         self.last_error = 0.0
                 
-        pyplot.ion()
+        #pyplot.ion()
         self.x_data, self.y_data = [], []
         self.figure = pyplot.figure()
         self.line, = pyplot.plot(self.x_data, self.y_data, '-')
         #self.ln, = plt.plot([], [], 'ro')
         animation = FuncAnimation(self.figure, self.update_ani, interval=10)
-        pyplot.xlabel('sample_time')  
-        pyplot.ylabel('delta_error')  
-        pyplot.title(self.name)
+        #pyplot.xlabel('sample_time')
+        #pyplot.ylabel('delta_error')
+        #pyplot.title(self.name)
                 
         # Windup Guard
         self.int_error = 0.0
@@ -115,17 +115,17 @@ class PID:
             self.last_error = error
             #print("P: " + delta_error + " | I ("+self.Ki+"):" +self.ITerm + " | D ("+self.Kd+"):" + self.DTerm)
             self.output = self.PTerm + (self.Ki * self.ITerm) + (self.Kd * self.DTerm)
-            print("%s out: %d - %4.3f ==== P(%4.3f): %4.3f | I (%4.3f): %4.3f | D (%4.3f): %4.3f" % (self.name, self.current_time, self.output, self.Kp, self.PTerm, self.Ki, self.ITerm, self.Kd, self.DTerm) )
+            #print("%s out: %d - %4.3f ==== P(%4.3f): %4.3f | I (%4.3f): %4.3f | D (%4.3f): %4.3f" % (self.name, self.current_time, self.output, self.Kp, self.PTerm, self.Ki, self.ITerm, self.Kd, self.DTerm) )
             #time.sleep(1)
             self.x_data.append(self.current_time)
             self.y_data.append(error)
             #pyplot.scatter(self.current_time, self.output)
-            self.line, = pyplot.plot(self.x_data, self.y_data, '-')
+            #self.line, = pyplot.plot(self.x_data, self.y_data, '-')
             #limit 50
             self.x_data = self.x_data[-50:]
             self.y_data = self.y_data[-50:]
-            pyplot.draw() 
-            pyplot.pause(0.01) #is necessary for the plot to update for some reason
+            #pyplot.draw()
+            #pyplot.pause(0.01) #is necessary for the plot to update for some reason
             #pyplot.show()
 
     def setKp(self, proportional_gain):

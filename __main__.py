@@ -12,8 +12,10 @@ race = race.Race(sample_time)
  
 ### INITIALIZE CARS
 
+'''
 # OPTION A: Qualify and record waypoints
 # Need to change the settings.json file. Check the JSON_examples folder
+'''
 pid_car1 = pid_car.Car(race.client, race.sample_time, 'SetCarName1', race.mode_input, filename='run-fast4.pickle') # Give the car the name you want
 cars = [pid_car1]
 

@@ -31,8 +31,8 @@ class Car:
             throttle_limits = [-1.0, 1.0] # Lower and Upper limits
             self.throttle_controller = control.PIDThrottleControl(self, throttle_pid_params, self.sample_time, throttle_limits)
             steering_limits = [-0.5, 0.5] # Lower and Upper limits
-            #self.steering_controller = control.PIDSteeringControl(self, steering_pid_params, self.sample_time, steering_limits)
-            #self.steering_controller.setTargetValue() # It's always zero (different from Throttle PID)
+            self.steering_controller = control.PIDSteeringControl(self, steering_pid_params, self.sample_time, steering_limits)
+            self.steering_controller.setTargetValue() # It's always zero (different from Throttle PID)
         
         else: # Record Waypoints
             self.recordWaypointsToFile()
@@ -65,8 +65,8 @@ class Car:
         keep_racing_throttle = self.throttle_controller.setTargetValue(self, self.waypoints_x, self.waypoints_y, self.waypoints_v) # Set goal each interaction, as speed target will change
         self = self.throttle_controller.getControlsFromPID(self) # Return controls after running PID (this method is different for each PID type)
         # Run Steering PID
-        #self, keep_racing_steering = self.steering_controller.getControlsFromPID(self, self.waypoints_x, self.waypoints_y) # Return controls after running PID (this method is different for each PID type)
-        #keep_racing = (keep_racing_throttle and keep_racing_steering)
+        self, keep_racing_steering = self.steering_controller.getControlsFromPID(self, self.waypoints_x, self.waypoints_y) # Return controls after running PID (this method is different for each PID type)
+        keep_racing = (keep_racing_throttle and keep_racing_steering)
         keep_racing = True # Force race all the time
         if keep_racing:
             self.setControls() # Send controls to simulation

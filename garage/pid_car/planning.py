@@ -6,7 +6,6 @@ import os, time, pickle, airsim, math
 from pynput import keyboard # Run $pip install pynput in the Anaconda prompt
 from skoods import utils
 
-
 class Waypoints:
     def __init__(self, car_name):
         self.waypoints_list = []
@@ -34,7 +33,6 @@ class Waypoints:
             self.last_time = self.current_time
         self.past_x_val = x_val
         self.past_y_val = y_val
-
 
     def saveWaypointsToFile(self, filename):
         print (self.car_name + " || WAYPOINTS: Saving waypoints to pickle file.")
@@ -93,4 +91,3 @@ class Behavior:
         if dist_from_start_point > 1.0 and self.mode != 'CRUZE':
             self.mode = 'CRUZE'
             print(self.car.name + " || BEHAVIOR: Mode = CRUZE")
-
