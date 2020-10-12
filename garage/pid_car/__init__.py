@@ -25,8 +25,12 @@ class Car:
             self.resetControls() # Initialize controls
 
             ### INITIALIZE PID CONTROLLER PARAMETERS
-            throttle_pid_params = [0.2, 0.0, 0.08]
-            steering_pid_params = [0.1, 0.0, 0.18]
+            #throttle_pid_params = [0.2, 0.0, 0.08]
+            #steering_pid_params = [0.1, 0.0, 0.18]
+            
+            throttle_pid_params = [0.2, 0.01, 0.18] #0.2, 0.1, 0.08
+            steering_pid_params = [0.05, 0.01, 0.4] #0.1, 0.0, 0.18
+
             # Initialize PID objects
             throttle_limits = [-1.0, 1.0] # Lower and Upper limits
             self.throttle_controller = control.PIDThrottleControl(self, throttle_pid_params, self.sample_time, throttle_limits)

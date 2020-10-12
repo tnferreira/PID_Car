@@ -67,7 +67,7 @@ class PIDThrottleControl(PIDControl):
         if keep_racing:
             # Avoid low speed set points, specialy during the start
             if waypoints_v[nearest_waypoint_index] > 2.0:
-                self.pid_controller.SetPoint = waypoints_v[nearest_waypoint_index]
+                self.pid_controller.SetPoint = waypoints_v[nearest_waypoint_index] * 1.5
             else:
                 self.pid_controller.SetPoint = 2.0
         return keep_racing
@@ -121,7 +121,6 @@ class PIDSteeringControl(PIDControl):
             # Update PID and set controls
             #print("steering: delta=" + str(delta_error))
             self.pid_controller.update(delta_error)
-            self.pid_controller.show()
             output = self.pid_controller.output
             output = self.limitOutput(output)
             car.controls.steering = output
