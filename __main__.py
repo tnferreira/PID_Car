@@ -5,10 +5,12 @@
 # import airsim
 from skoods import race
 from garage import pid_car
+from plot import Plot
 
 # Connect to Skoods simulation
 sample_time = 0.01 # Define the sample time to perform all processing.
 race = race.Race(sample_time)
+showPlots = True
  
 ### INITIALIZE CARS
 
@@ -40,10 +42,14 @@ elif race.mode_input == '2' or race.mode_input == '3':
     race.setCars(cars)
     race.setInitialTime()
     keep_racing = True
+    if showPlots:
+        p = Plot(blit=True)
     while(keep_racing):
         for each_car in cars:
             ### RUN YOUR CODE HERE
             keep_racing_from_car = each_car.race() # keep_racing_from_car not being used, but I will leave here just in case
+            if showPlots:
+                p.update(each_car)
             ### END HERE3
         race.playSimulation() # Will check for mode
         keep_racing_from_race = race.updateRaceParameters()

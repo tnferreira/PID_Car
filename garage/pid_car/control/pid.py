@@ -30,8 +30,8 @@ More information about PID Controller: http://en.wikipedia.org/wiki/PID_controll
 """
 import time
 from datetime import datetime
-from matplotlib import pyplot
-from matplotlib.animation import FuncAnimation
+#from matplotlib import pyplot
+#from matplotlib.animation import FuncAnimation
 
 
 class PID:
