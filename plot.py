@@ -171,26 +171,32 @@ class Plot:
         # ax3.legend()
 
         self.fig3_axs[0].set_ylabel('Speed P Term')
+        self.fig3_axs[0].set_ylim([-100, 100])
         # self.fig3_axs[0].set_ylim([speed_proportional_term_deque.min(), speed_proportional_term_deque.max()])
         # ax2.legend()
 
         self.fig3_axs[1].set_ylabel('Speed I Term')
+        self.fig3_axs[1].set_ylim([-100, 100])
         # self.fig3_axs[1].set_ylim([speed_integral_term_deque.min(), speed_integral_term_deque.max()])
         # ax2.legend()
 
         self.fig3_axs[2].set_ylabel('Speed D Term')
+        self.fig3_axs[2].set_ylim([-100, 100])
         # self.fig3_axs[2].set_ylim([speed_derivative_term_deque.min(), speed_derivative_term_deque.max()])
         # ax2.legend()
 
         self.fig3_axs[3].set_ylabel('Steering P Term')
+        self.fig3_axs[3].set_ylim([-100, 100])
         # self.fig3_axs[3].set_ylim([steering_proportional_term_deque.min(), steering_proportional_term_deque.max()])
         # ax2.legend()
 
         self.fig3_axs[4].set_ylabel('Steering I Term')
+        self.fig3_axs[4].set_ylim([-100, 100])
         # self.fig3_axs[4].set_ylim([steering_integral_term_deque.min(), steering_integral_term_deque.max()])
         # ax2.legend()
 
         self.fig3_axs[5].set_ylabel('Steering D Term')
+        self.fig3_axs[5].set_ylim([-100, 100])
         # self.fig3_axs[5].set_ylim([steering_derivative_term_deque.min(), steering_derivative_term_deque.max()])
         # ax2.legend()
 
@@ -307,12 +313,12 @@ class Plot:
         # fig2_ax2.set_ylim([y[5].min(), y[5].max()])
         # fig2_ax3.set_ylim([y[8].min(), y[8].max()])
         # fig2_ax4.set_ylim([y[11].min(), y[11].max()])
-        self.fig3_axs[0].set_ylim([self.y[6].min(), self.y[6].max()])
-        self.fig3_axs[1].set_ylim([self.y[7].min(), self.y[7].max()])
-        self.fig3_axs[2].set_ylim([self.y[8].min(), self.y[8].max()])
-        self.fig3_axs[3].set_ylim([self.y[9].min(), self.y[9].max()])
-        self.fig3_axs[4].set_ylim([self.y[10].min(), self.y[10].max()])
-        self.fig3_axs[5].set_ylim([self.y[11].min(), self.y[11].max()])
+        # self.fig3_axs[0].set_ylim([self.y[6].min(), self.y[6].max()])
+        # self.fig3_axs[1].set_ylim([self.y[7].min(), self.y[7].max()])
+        # self.fig3_axs[2].set_ylim([self.y[8].min(), self.y[8].max()])
+        # self.fig3_axs[3].set_ylim([self.y[9].min(), self.y[9].max()])
+        # self.fig3_axs[4].set_ylim([self.y[10].min(), self.y[10].max()])
+        # self.fig3_axs[5].set_ylim([self.y[11].min(), self.y[11].max()])
 
         if self.blit:
             # In this post http://bastibe.de/2013-05-30-speeding-up-matplotlib.html
