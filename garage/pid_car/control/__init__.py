@@ -67,7 +67,7 @@ class PIDThrottleControl(PIDControl):
         if keep_racing:
             # Avoid low speed set points, specialy during the start
             if waypoints_v[nearest_waypoint_index] > 2.0:
-                self.pid_controller.SetPoint = waypoints_v[nearest_waypoint_index] * 1.5
+                self.pid_controller.SetPoint = waypoints_v[nearest_waypoint_index]
             else:
                 self.pid_controller.SetPoint = 2.0
         return keep_racing

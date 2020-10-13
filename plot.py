@@ -72,8 +72,8 @@ class Plot:
         self.lines.append(self.fig1_axs[1].plot([], lw=lw, label='Gear')[0])
         self.lines.append(self.fig1_axs[2].plot([], lw=lw, label='Throttle')[0])
         self.lines.append(self.fig1_axs[3].plot([], lw=lw, label='Steering')[0])
-        self.lines.append(self.fig1_axs[0].plot([], lw=lw, label='Speed Set Point')[0])
-        self.lines.append(self.fig1_axs[3].plot([], lw=lw, label='Steering Set Point')[0])
+        self.lines.append(self.fig1_axs[0].plot([], lw=lw, label='Speed SP')[0])
+        self.lines.append(self.fig1_axs[3].plot([], lw=lw, label='Steering SP')[0])
 
         # ----- Figure 2 ----- #
         #self.fig2, self.fig2_axs = plt.subplots(4, 1)
@@ -173,17 +173,17 @@ class Plot:
         # ax3.legend()
 
         self.fig3_axs[0].set_ylabel('Speed P')
-        self.fig3_axs[0].set_ylim([-1, 1])
+        self.fig3_axs[0].set_ylim([-1.1, 1.1])
         # self.fig3_axs[0].set_ylim([speed_proportional_term_deque.min(), speed_proportional_term_deque.max()])
         # ax2.legend()
 
         self.fig3_axs[1].set_ylabel('Speed I')
-        self.fig3_axs[1].set_ylim([-1, 1])
+        self.fig3_axs[1].set_ylim([-1.1, 1.1])
         # self.fig3_axs[1].set_ylim([speed_integral_term_deque.min(), speed_integral_term_deque.max()])
         # ax2.legend()
 
         self.fig3_axs[2].set_ylabel('Speed D')
-        self.fig3_axs[2].set_ylim([-1, 1])
+        self.fig3_axs[2].set_ylim([-1.1, 1.1])
         # self.fig3_axs[2].set_ylim([speed_derivative_term_deque.min(), speed_derivative_term_deque.max()])
         # ax2.legend()
 
