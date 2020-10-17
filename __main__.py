@@ -11,6 +11,7 @@ from plot import Plot
 sample_time = 0.01 # Define the sample time to perform all processing.
 race = race.Race(sample_time)
 showPlots = True
+speedy = True
  
 ### INITIALIZE CARS
 
@@ -47,7 +48,10 @@ elif race.mode_input == '2' or race.mode_input == '3':
     while(keep_racing):
         for each_car in cars:
             ### RUN YOUR CODE HERE
-            keep_racing_from_car = each_car.race() # keep_racing_from_car not being used, but I will leave here just in case
+            if speedy:
+                keep_racing_from_car = each_car.speedyRace()
+            else:
+                keep_racing_from_car = each_car.race()  # keep_racing_from_car not being used, but I will leave here just in case
             if showPlots:
                 p.update(each_car)
             ### END HERE3
