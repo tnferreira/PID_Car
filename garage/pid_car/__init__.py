@@ -62,11 +62,11 @@ class Car:
     def updateTrajectory(self):
         self.waypoints_x, self.waypoints_y, self.waypoints_v = self.waypoints.waypointsToLists(self.waypoints_correction)
 
-
     def updateControls(self):
         # Run Throttle PID
         keep_racing_throttle = self.throttle_controller.setTargetValue(self, self.waypoints_x, self.waypoints_y, self.waypoints_v) # Set goal each interaction, as speed target will change
         self = self.throttle_controller.getControlsFromPID(self) # Return controls after running PID (this method is different for each PID type)
+
         # Run Steering PID
         self, keep_racing_steering = self.steering_controller.getControlsFromPID(self, self.waypoints_x, self.waypoints_y) # Return controls after running PID (this method is different for each PID type)
         keep_racing = (keep_racing_throttle and keep_racing_steering)
@@ -95,4 +95,25 @@ class Car:
         self.updateState() # update position and other data
         self.updateCarBehavior() # define the behavior of the car based on conditions
         keep_racing = self.updateControls() # return false if waypoints reach final index
+        return keep_racing
+    
+    def drive(self, speed, steering):
+        self.updateState() # update position and other data
+        self.updateCarBehavior() # define the behavior of the car based on conditions
+
+        #NEW CONTROLS
+         # Run Throttle PID
+        keep_racing_throttle = self.throttle_controller.setTargetValueFixed(speed)
+        self = self.throttle_controller.getControlsFromPID(self) # Return controls after running PID (this method is different for each PID type)
+
+        # Run Steering PID
+        self.throttle_controller.setTargetValueFixed(steering)
+        self, keep_racing_steering = self.steering_controller.getControlsFromPID(self, self.waypoints_x, self.waypoints_y) # Return controls after running PID (this method is different for each PID type)
+        keep_racing = (keep_racing_throttle and keep_racing_steering)
+        keep_racing = True # Force race all the time
+        if keep_racing:
+            self.setControls() # Send controls to simulation
+        else:
+            self.resetControls()
+            print(self.name + " || WARNING: WAYPOINTS - Waypoints out of range. You didn't complete the lap :(")
         return keep_racing

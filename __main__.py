@@ -55,6 +55,6 @@ elif race.mode_input == '2' or race.mode_input == '3':
         keep_racing_from_race = race.updateRaceParameters()
         keep_racing = (keep_racing_from_car and keep_racing_from_race) # you can add more interruptions if needed
 
-# car1.resetControls()
-# race.client.enableApiControl(False, car1.name)
-# race.client.reset()
+#pid_car1.resetControls()
+#race.client.enableApiControl(False, 'SetCarName1')
+#race.client.reset()

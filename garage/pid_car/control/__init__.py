@@ -66,14 +66,39 @@ class PIDThrottleControl(PIDControl):
         nearest_waypoint_index, keep_racing = self.updateNearestIndex(car_state, waypoints_x, waypoints_y)
         if keep_racing:
             # Avoid low speed set points, specialy during the start
-            if waypoints_v[nearest_waypoint_index] > 2.0:
+            min_speed = 2.0
+            if waypoints_v[nearest_waypoint_index] > min_speed:
                 self.pid_controller.SetPoint = waypoints_v[nearest_waypoint_index]
             else:
-                self.pid_controller.SetPoint = 2.0
+                self.pid_controller.SetPoint = min_speed
         return keep_racing
+
+    def setTargetValueFixed(self, setPoint):
+        self.pid_controller.SetPoint = setPoint
+        return True
 
     def getControlsFromPID(self, car):
         # Return the value of the controls after updating the PID
+        self.pid_controller.update(car.state.speed)
+        output = self.pid_controller.output
+        output = self.limitOutput(output)
+        #print("throttle: speed=" + str(car.state.speed) + " output: " + str(output))
+        # Define throttle and brake
+        if output < 0.0:
+            car.controls.throttle = 0.0
+            car.controls.brake = output
+        if output >= 0.0:
+            car.controls.brake = 0.0
+            car.controls.throttle = output
+        return car
+
+class PIDSpeedControl(PIDControl):
+    def __init__(self, car_state, pid_params, sample_time, limits):
+        PIDControl.__init__(self, car_state, pid_params, sample_time, limits)
+
+    def getControlsFromPID(self, car, target_speed):
+        # Return the value of the controls after updating the PID
+        self.pid_controller.SetPoint = target_speed
         self.pid_controller.update(car.state.speed)
         output = self.pid_controller.output
         output = self.limitOutput(output)
@@ -95,7 +120,10 @@ class PIDSteeringControl(PIDControl):
     def setTargetValue(self):
         # The target of steering is always 0, and the error is the distance from the car to the nearest point
         self.pid_controller.SetPoint = 0.0
-
+    
+    def setTargetValueFixed(self, setPoint):
+        self.pid_controller.SetPoint = setPoint
+        return True
 
     def getControlsFromPID(self, car, waypoints_x, waypoints_y):
         # Return the value of the controls after updating the PID
@@ -121,9 +149,24 @@ class PIDSteeringControl(PIDControl):
             # Update PID and set controls
             #print("steering: delta=" + str(delta_error))
             self.pid_controller.update(delta_error)
-            output = self.pid_controller.output
+            output = self.pid_controller.output    #SetPoint defined before, output is calculated in parent class
             output = self.limitOutput(output)
             car.controls.steering = output
 
         return car, keep_racing
 
+class PIDTrackAngleControl(PIDControl):
+    def __init__(self, car, pid_params, sample_time, limits):
+        PIDControl.__init__(self, car, pid_params, sample_time, limits)
+
+    def getControlsFromPID(self, car, target_track_angle):
+        self.pid_controller.SetPoint = target_track_angle
+        # Update PID and set controls
+        delta_angle_error = 0.0 #TODO calc diff
+
+        #print("steering: delta=" + str(delta_error))
+        self.pid_controller.update(delta_angle_error) # ????????
+        output = self.pid_controller.output    #SetPoint defined before, output is calculated in parent class
+        output = self.limitOutput(output)
+        car.controls.steering = output
+        return car

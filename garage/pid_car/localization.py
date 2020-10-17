@@ -19,7 +19,8 @@ def updateState(car):
 CARSTATE STRUCTURE
 <CarState> {   'gear': 1,
     'handbrake': False,
-    'kinematics_estimated': <KinematicsState> {   'angular_acceleration': <Vector3r> {   'x_val': 0.00029464520048350096,
+    'kinematics_estimated': <KinematicsState> {   
+    'angular_acceleration': <Vector3r> {   'x_val': 0.00029464520048350096,
     'y_val': -0.06526550650596619,
     'z_val': 0.0022375881671905518},
     'angular_velocity': <Vector3r> {   'x_val': 2.47272018896183e-05,
