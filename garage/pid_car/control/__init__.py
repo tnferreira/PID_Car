@@ -5,6 +5,7 @@
 import math
 from garage.pid_car.control import pid
 from skoods import utils
+import numpy as np
 
 
 # Create PIDControl generic class
@@ -66,11 +67,16 @@ class PIDThrottleControl(PIDControl):
         nearest_waypoint_index, keep_racing = self.updateNearestIndex(car_state, waypoints_x, waypoints_y)
         if keep_racing:
             # Avoid low speed set points, specialy during the start
-            if waypoints_v[nearest_waypoint_index] > 2.0:
+            min_speed = 2.0
+            if waypoints_v[nearest_waypoint_index] > min_speed:
                 self.pid_controller.SetPoint = waypoints_v[nearest_waypoint_index]
             else:
-                self.pid_controller.SetPoint = 2.0
+                self.pid_controller.SetPoint = min_speed
         return keep_racing
+
+    def setTargetValueFixed(self, setPoint):
+        self.pid_controller.SetPoint = setPoint
+        return True
 
     def getControlsFromPID(self, car):
         # Return the value of the controls after updating the PID
@@ -88,6 +94,37 @@ class PIDThrottleControl(PIDControl):
         return car
 
 
+class PIDSpeedControl(PIDControl):
+    """"
+    This class allows one to control the magnitude of the velocity vector, i.e. car's speed. In particular, it employs
+     a PID controller to generate a throttle control signal such that the car's speed will seek a reference value.
+    """
+    def __init__(self, car_state, pid_params, sample_time, limits):
+        PIDControl.__init__(self, car_state, pid_params, sample_time, limits)
+
+    def getControlsFromPID(self, car, target_speed):
+
+        # Get current speed
+        current_speed = car.getCurrentSpeed()
+        # print("target_speed: " + str(target_speed) + " [m/s]")
+        # print("current_speed: " + str(current_speed) + " [m/s]")
+
+        # Return the value of the controls after updating the PID
+        self.pid_controller.SetPoint = target_speed
+        self.pid_controller.update(current_speed)
+        output = self.pid_controller.output
+        output = self.limitOutput(output)
+
+        # Define throttle and brake
+        if output < 0.0:
+            car.controls.throttle = 0.0
+            car.controls.brake = output
+        if output >= 0.0:
+            car.controls.brake = 0.0
+            car.controls.throttle = output
+        return car
+
+
 class PIDSteeringControl(PIDControl):
     def __init__(self, car, pid_params, sample_time, limits):
         PIDControl.__init__(self, car, pid_params, sample_time, limits)
@@ -95,7 +132,10 @@ class PIDSteeringControl(PIDControl):
     def setTargetValue(self):
         # The target of steering is always 0, and the error is the distance from the car to the nearest point
         self.pid_controller.SetPoint = 0.0
-
+    
+    def setTargetValueFixed(self, setPoint):
+        self.pid_controller.SetPoint = setPoint
+        return True
 
     def getControlsFromPID(self, car, waypoints_x, waypoints_y):
         # Return the value of the controls after updating the PID
@@ -121,9 +161,37 @@ class PIDSteeringControl(PIDControl):
             # Update PID and set controls
             #print("steering: delta=" + str(delta_error))
             self.pid_controller.update(delta_error)
-            output = self.pid_controller.output
+            output = self.pid_controller.output    #SetPoint defined before, output is calculated in parent class
             output = self.limitOutput(output)
             car.controls.steering = output
 
         return car, keep_racing
 
+
+class PIDTrackAngleControl(PIDControl):
+    """"
+    This class allows one to control the orientation of the velocity vector, i.e. track angle. In particular, it employs
+     a PID controller to generate a steering control signal such that the car's track angle will seek a reference value.
+    """
+    def __init__(self, car, pid_params, sample_time, limits):
+        PIDControl.__init__(self, car, pid_params, sample_time, limits)
+
+    def getControlsFromPID(self, car, target_track_angle):
+
+        # Get current track angle
+        current_track_angle = car.getCurrentTrackAngle()
+
+        # Compute the track angle error properly
+        track_angle_error = np.unwrap(target_track_angle - current_track_angle)
+        # print("target_track_angle: " + str(np.rad2deg(target_track_angle)) + " [deg]")
+        # print("current_track_angle: " + str(np.rad2deg(current_track_angle)) + " [deg]")
+        # print("track_angle_error: " + str(np.rad2deg(track_angle)) + " [deg]")
+
+        # Update PID and set controls
+        self.pid_controller.SetPoint = 0.0  # Actually, the set point is not zero
+        self.pid_controller.update(-track_angle_error)  # The difference between the current and the target track angle
+        # is plugged here
+        output = self.pid_controller.output
+        output = self.limitOutput(output)
+        car.controls.steering = output
+        return car

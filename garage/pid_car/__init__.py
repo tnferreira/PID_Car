@@ -4,6 +4,7 @@
 
 import airsim
 from garage.pid_car import localization, planning, control
+import numpy as np
 
 
 class Car:
@@ -29,18 +30,26 @@ class Car:
             #steering_pid_params = [0.1, 0.00, 0.18] #best values ~20m/s
             throttle_pid_params = [0.2, 0.03, 0.08]
             steering_pid_params = [0.1, 0.00, 0.18]
+            speed_pid_params = [0.2, 0.03, 0.08]
+            track_angle_pid_params = [0.1, 0.00, 0.18]
+
+            # Lower and upper control limits
+            throttle_limits = [-1.0, 1.0]
+            steering_limits = [-0.5, 0.5]
 
             # Initialize PID objects
-            throttle_limits = [-1.0, 1.0] # Lower and Upper limits
-            self.throttle_controller = control.PIDThrottleControl(self, throttle_pid_params, self.sample_time, throttle_limits)
-            steering_limits = [-0.5, 0.5] # Lower and Upper limits
-            self.steering_controller = control.PIDSteeringControl(self, steering_pid_params, self.sample_time, steering_limits)
-            self.steering_controller.setTargetValue() # It's always zero (different from Throttle PID)
+            self.throttle_controller = control.PIDThrottleControl(self, throttle_pid_params, self.sample_time,
+                                                                  throttle_limits)
+            self.steering_controller = control.PIDSteeringControl(self, steering_pid_params, self.sample_time,
+                                                                  steering_limits)
+            self.steering_controller.setTargetValue()  # It's always zero (different from Throttle PID)
 
-            speed_pid_params = [0.2, 0.03, 0.08]
-            self.speed_controller = control.PIDSpeedControl(self, speed_pid_params, self.sample_time, throttle_limits)
+            self.speed_controller = control.PIDSpeedControl(self, speed_pid_params, self.sample_time,
+                                                            throttle_limits)
+            self.track_angle_controller = control.PIDTrackAngleControl(self, track_angle_pid_params, self.sample_time,
+                                                                       steering_limits)
         
-        else: # Record Waypoints
+        else:  # Record Waypoints
             self.recordWaypointsToFile()
 
 
@@ -65,11 +74,11 @@ class Car:
     def updateTrajectory(self):
         self.waypoints_x, self.waypoints_y, self.waypoints_v = self.waypoints.waypointsToLists(self.waypoints_correction)
 
-
     def updateControls(self):
         # Run Throttle PID
         keep_racing_throttle = self.throttle_controller.setTargetValue(self, self.waypoints_x, self.waypoints_y, self.waypoints_v) # Set goal each interaction, as speed target will change
         self = self.throttle_controller.getControlsFromPID(self) # Return controls after running PID (this method is different for each PID type)
+
         # Run Steering PID
         self, keep_racing_steering = self.steering_controller.getControlsFromPID(self, self.waypoints_x, self.waypoints_y) # Return controls after running PID (this method is different for each PID type)
         keep_racing = (keep_racing_throttle and keep_racing_steering)
@@ -101,24 +110,25 @@ class Car:
         return keep_racing
 
 
-    def updateSpeedyControls(self):
-        # Run Throttle PID
-        keep_racing_throttle = self.throttle_controller.setSpeedyTargetValue(self, self.waypoints_x, self.waypoints_y, self.waypoints_v) # Set goal each interaction, as speed target will change
-        self = self.throttle_controller.getSpeedyControlsFromPID(self) # Return controls after running PID (this method is different for each PID type)
-        # Run Steering PID
-        self, keep_racing_steering = self.steering_controller.getSpeedyControlsFromPID(self, self.waypoints_x, self.waypoints_y) # Return controls after running PID (this method is different for each PID type)
-        keep_racing = (keep_racing_throttle and keep_racing_steering)
-        keep_racing = True # Force race all the time
-        if keep_racing:
-            self.setControls() # Send controls to simulation
-        else:
-            self.resetControls()
-            print(self.name + " || WARNING: WAYPOINTS - Waypoints out of range. You didn't complete the lap :(")
-        return keep_racing
+    def drive(self, speed, steering):
+        self.updateState()  # update position and other data
+        self.updateCarBehavior()  # define the behavior of the car based on conditions
+
+        # Run Speed PID
+        self = self.speed_controller.getControlsFromPID(self, speed)
+
+        # Run Track Angle PID
+        self = self.track_angle_controller.getControlsFromPID(self, steering)
+
+        # Send controls to simulation
+        self.setControls()
 
 
-    def speedyRace(self):
-        self.updateState() # update position and other data
-        self.updateCarBehavior() # define the behavior of the car based on conditions
-        keep_racing = self.updateSpeedyControls() # return false if waypoints reach final index
-        return keep_racing
+    def getCurrentSpeed(self):
+        return self.state.speed
+
+
+    def getCurrentTrackAngle(self):
+        return np.arctan2(self.state.kinematics_estimated.linear_velocity.y_val,
+                          self.state.kinematics_estimated.linear_velocity.x_val)
+
