@@ -49,7 +49,7 @@ elif race.mode_input == '2' or race.mode_input == '3':
         for each_car in cars:
             ### RUN YOUR CODE HERE
             if speedy:
-                keep_racing_from_car = each_car.speedyRace()
+                keep_racing_from_car = each_car.speedy_race()
             else:
                 keep_racing_from_car = each_car.race()  # keep_racing_from_car not being used, but I will leave here just in case
             if showPlots:

@@ -3,7 +3,7 @@
 ##########################################
 
 import airsim
-from garage.pid_car import localization, planning, control
+from garage.pid_car import localization, planning, control, guidance
 import numpy as np
 
 
@@ -30,6 +30,7 @@ class Car:
             #steering_pid_params = [0.1, 0.00, 0.18] #best values ~20m/s
             throttle_pid_params = [0.2, 0.03, 0.08]
             steering_pid_params = [0.1, 0.00, 0.18]
+
             speed_pid_params = [0.2, 0.03, 0.08]
             track_angle_pid_params = [0.1, 0.00, 0.18]
 
@@ -48,6 +49,12 @@ class Car:
                                                             throttle_limits)
             self.track_angle_controller = control.PIDTrackAngleControl(self, track_angle_pid_params, self.sample_time,
                                                                        steering_limits)
+
+            self.path_planner = planning.PathPlanner(epsilon=1, sample_time=0.01, number_samples=500, min_distance=3)
+            self.path_planner.update_reference_profile_from_recorded_waypoints(waypoints_x, waypoints_y, waypoints_v)
+
+            self.pure_pursuit = guidance.Guidance(max_straight_track_speed=20.0, max_curving_speed=15.0,
+                                                  max_turning_rate=5.0)
         
         else:  # Record Waypoints
             self.recordWaypointsToFile()
@@ -110,7 +117,7 @@ class Car:
         return keep_racing
 
 
-    def drive(self, speed, steering):
+    def drive(self, speed, track_angle):
         self.updateState()  # update position and other data
         self.updateCarBehavior()  # define the behavior of the car based on conditions
 
@@ -118,15 +125,49 @@ class Car:
         self = self.speed_controller.getControlsFromPID(self, speed)
 
         # Run Track Angle PID
-        self = self.track_angle_controller.getControlsFromPID(self, steering)
+        self = self.track_angle_controller.getControlsFromPID(self, track_angle)
 
         # Send controls to simulation
         self.setControls()
 
+    def speedy_race(self):
+        self.updateState()  # update position and other data
+        self.updateCarBehavior()  # define the behavior of the car based on conditions
+
+        # Get vehicle state
+        current_vehicle_position_x, current_vehicle_position_y = self.getCurrentPostion()
+        current_vehicle_speed = self.getCurrentSpeed()
+        current_vehicle_track_angle = self.getCurrentTrackAngle()
+
+        # Get next waypoint
+        next_waypoint_x, next_waypoint_y, next_waypoint_v, completed_lap = self.path_planner.get_next_reference_profile_waypoint(
+            current_vehicle_position_x, current_vehicle_position_y, current_vehicle_speed, current_vehicle_track_angle)
+
+        # Compute speed and track angle set points
+        speed_set_point, track_angle_set_point = self.pure_pursuit.update_control_targets(current_vehicle_position_x,
+                                                                                          current_vehicle_position_y,
+                                                                                          current_vehicle_speed,
+                                                                                          current_vehicle_track_angle,
+                                                                                          next_waypoint_x,
+                                                                                          next_waypoint_y,
+                                                                                          next_waypoint_v)
+
+        # Run Speed PID
+        self = self.speed_controller.getControlsFromPID(self, speed_set_point)
+
+        # Run Track Angle PID
+        self = self.track_angle_controller.getControlsFromPID(self, track_angle_set_point)
+
+        # Send controls to simulation
+        self.setControls()
+
+        return completed_lap
+
+    def getCurrentPostion(self):
+        return self.state.kinematics_estimated.position.x_val, self.state.kinematics_estimated.position.y_val
 
     def getCurrentSpeed(self):
         return self.state.speed
-
 
     def getCurrentTrackAngle(self):
         return np.arctan2(self.state.kinematics_estimated.linear_velocity.y_val,

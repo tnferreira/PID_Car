@@ -94,37 +94,6 @@ class PIDThrottleControl(PIDControl):
         return car
 
 
-class PIDSpeedControl(PIDControl):
-    """"
-    This class allows one to control the magnitude of the velocity vector, i.e. car's speed. In particular, it employs
-     a PID controller to generate a throttle control signal such that the car's speed will seek a reference value.
-    """
-    def __init__(self, car_state, pid_params, sample_time, limits):
-        PIDControl.__init__(self, car_state, pid_params, sample_time, limits)
-
-    def getControlsFromPID(self, car, target_speed):
-
-        # Get current speed
-        current_speed = car.getCurrentSpeed()
-        # print("target_speed: " + str(target_speed) + " [m/s]")
-        # print("current_speed: " + str(current_speed) + " [m/s]")
-
-        # Return the value of the controls after updating the PID
-        self.pid_controller.SetPoint = target_speed
-        self.pid_controller.update(current_speed)
-        output = self.pid_controller.output
-        output = self.limitOutput(output)
-
-        # Define throttle and brake
-        if output < 0.0:
-            car.controls.throttle = 0.0
-            car.controls.brake = output
-        if output >= 0.0:
-            car.controls.brake = 0.0
-            car.controls.throttle = output
-        return car
-
-
 class PIDSteeringControl(PIDControl):
     def __init__(self, car, pid_params, sample_time, limits):
         PIDControl.__init__(self, car, pid_params, sample_time, limits)
@@ -166,6 +135,37 @@ class PIDSteeringControl(PIDControl):
             car.controls.steering = output
 
         return car, keep_racing
+
+
+class PIDSpeedControl(PIDControl):
+    """"
+    This class allows one to control the magnitude of the velocity vector, i.e. car's speed. In particular, it employs
+     a PID controller to generate a throttle control signal such that the car's speed will seek a reference value.
+    """
+    def __init__(self, car_state, pid_params, sample_time, limits):
+        PIDControl.__init__(self, car_state, pid_params, sample_time, limits)
+
+    def getControlsFromPID(self, car, target_speed):
+
+        # Get current speed
+        current_speed = car.getCurrentSpeed()
+        # print("target_speed: " + str(target_speed) + " [m/s]")
+        # print("current_speed: " + str(current_speed) + " [m/s]")
+
+        # Return the value of the controls after updating the PID
+        self.pid_controller.SetPoint = target_speed
+        self.pid_controller.update(current_speed)
+        output = self.pid_controller.output
+        output = self.limitOutput(output)
+
+        # Define throttle and brake
+        if output < 0.0:
+            car.controls.throttle = 0.0
+            car.controls.brake = output
+        if output >= 0.0:
+            car.controls.brake = 0.0
+            car.controls.throttle = output
+        return car
 
 
 class PIDTrackAngleControl(PIDControl):

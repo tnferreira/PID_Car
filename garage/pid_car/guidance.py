@@ -7,74 +7,45 @@ class Guidance:
     state and the reference trajectory.
     """
 
-    def __init__(self, name="", max_straight_track_speed=40.0, max_curving_speed=15.0):
+    def __init__(self, max_straight_track_speed=20.0, max_curving_speed=15.0, max_turning_rate=5.0):
         """
         Class constructor.
 
-        :param name: object name for logging purposes
-        :param max_straight_track_speed: maximum allowed velocity magnitude along straight tracks
-        :param max_curving_speed: maximum allowed velocity magnitude along curves
-        """
-        self.name = name
+        :param max_straight_track_speed: maximum allowed velocity magnitude along straight tracks in meter per second
+        :param max_curving_speed: maximum allowed velocity magnitude along curves in meters per second
+        :param max_turning_rate: maximum allowed turning rate in degrees per second
+       """
         self.max_straight_track_speed = max_straight_track_speed
         self.max_curving_speed = max_curving_speed
-        self.speed_reference = 0.0
-        self.steering_reference = 0.0
-        self.initial_search_index = 0
-        self.DELTA_INITIAL_SEARCH_INDEX = 300 # Avoid searching all waypoints. We can make it dinamic by getting time stamps.
+        self.max_turning_rate = max_turning_rate
 
-    def updateNearestIndex(self, car, waypoints_x, waypoints_y):
+    def update_control_targets(self, current_vehicle_position_x, current_vehicle_position_y, current_vehicle_speed,
+                               current_vehicle_track_angle, next_waypoint_x, next_waypoint_y, next_waypoint_v):
         """
-        Function to return nearest point from waypoints to car position.
+        Compute the new speed and track angle control set points according to a modified pure pursuit guidance law.
 
-        :param car: car object containing all parameters and states
-        :param waypoints_x: array containing the X axis coordinates of all waypoints along the reference trajectory
-        :param waypoints_y: array containing the Y axis coordinates of all waypoints along the reference trajectory
-        :return: index of the nearest waypoint and a flag indicating whether the trajectory end was reached or not
+        :param current_vehicle_position_x: current vehicle position X coordinate
+        :param current_vehicle_position_y: current vehicle position X coordinate
+        :param current_vehicle_speed: current vehicle velocity magnitude
+        :param current_vehicle_track_angle: current vehicle velocity orientation
+        :param next_waypoint_x: next waypoint position X coordinate
+        :param next_waypoint_y: next waypoint position Y coordinate
+        :param next_waypoint_v: next waypoint velocity magnitude
+        :return: Updated speed and track angle set points.
         """
-        length = len(waypoints_x)
-        final_search_index = self.initial_search_index + self.DELTA_INITIAL_SEARCH_INDEX
-        if final_search_index > length - 1:
-            final_search_index = -1  # define as last element
 
-        dx = [car.state.kinematics_estimated.position.x_val - iwpx for iwpx in
-              waypoints_x[self.initial_search_index:final_search_index]]
-        dy = [car.state.kinematics_estimated.position.y_val - iwpy for iwpy in
-              waypoints_y[self.initial_search_index:final_search_index]]
-        d = [ix ** 2 + iy ** 2 for (ix, iy) in zip(dx, dy)]
-        nearest_waypoint_distance = min(d)
-        nearest_waypoint_index = d.index(nearest_waypoint_distance)
-        nearest_waypoint_index += self.initial_search_index
+        # Displacements along the X and Y axis
+        dx = next_waypoint_x - current_vehicle_position_x
+        dy = next_waypoint_y - current_vehicle_position_y
 
-        # Check end of waypoints index
-        if nearest_waypoint_index >= length - 2:
-            self.initial_search_index = 0
-            keep_racing = False
-        else:
-            keep_racing = True
-            self.initial_search_index = nearest_waypoint_index
+        # Distance and angle to the next waypoint
+        distance_to_next_waypoint = np.hypot(dx, dy)
+        angle_to_next_waypoint = np.arctan2(dy, dx)
 
-        keep_racing = True  # Force
+        dv = next_waypoint_v - current_vehicle_speed
+        da = np.unwrap(angle_to_next_waypoint - current_vehicle_track_angle)
 
-        return nearest_waypoint_index, keep_racing
+        speed_set_point = next_waypoint_v
+        track_angle_set_point = angle_to_next_waypoint
 
-    def updateTargets(self, car, waypoints_x, waypoints_y, waypoints_v):
-        """
-        Update the speed and steering references for the PID controllers.
-
-        :param car: car object containing all parameters and states
-        :param waypoints_x: array containing the X axis coordinates of all waypoints along the reference trajectory
-        :param waypoints_y: array containing the Y axis coordinates of all waypoints along the reference trajectory
-        :param waypoints_v: array containing the velocity magnitude of all waypoints along the reference trajectory
-        :return: the new speed and steering references
-        """
-        # Set the value of the target by returning the speed of the nearest waypoint
-        nearest_waypoint_index, keep_racing = self.updateNearestIndex(car, waypoints_x, waypoints_y)
-        if keep_racing:
-            # Avoid low speed set points, specialy during the start
-            if waypoints_v[nearest_waypoint_index] > 2.0:
-                self.pid_controller.SetPoint = waypoints_v[nearest_waypoint_index]
-            else:
-                self.pid_controller.SetPoint = 2.0
-
-        return keep_racing
+        return speed_set_point, track_angle_set_point
