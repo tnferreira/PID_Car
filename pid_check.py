@@ -1,6 +1,6 @@
 import airsim
 import time
-from pid_plot import Plot
+from plot import Plot
 from garage import pid_car
 import math
 import numpy as np
@@ -15,7 +15,7 @@ car_controls = airsim.CarControls()
 sample_time = 0.01  # [s]
 
 # Define the speed step parameters
-speed_step_duration = 20  # [s]
+speed_step_duration = 10  # [s]
 speed_step_amplitude = 10.0  # [m/s]
 speed_step_samples = math.floor(speed_step_duration / sample_time)
 
@@ -31,25 +31,29 @@ pid_car1 = pid_car.Car(client, sample_time, 'SetCarName1', '2', filename='run-fa
 p = Plot(blit=True)
 
 # Get initial track angle
-initial_track_angle = pid_car1.getCurrentTrackAngle()
-# print("initial_track_angle: " + str(np.rad2deg(initial_track_angle)) + " [deg]")
+initial_track_angle = np.deg2rad(-90.0) #pid_car1.getCurrentTrackAngle()
+print("initial_track_angle: " + str(np.rad2deg(initial_track_angle)) + " [deg]")
 
 # Apply a speed step keeping the current track angle
 for x in range(speed_step_samples):
     pid_car1.drive(speed_step_amplitude, initial_track_angle)
     p.update(pid_car1)
+    #print("current_track_angle: " + str(np.rad2deg(pid_car1.getCurrentTrackAngle())) + " [deg]")
 
+print(" Apply a track angle step to the right keeping the speed target: " + str(np.rad2deg(track_angle_step_amplitude)))
 # Apply a track angle step to the right keeping the speed target
 for x in range(track_angle_step_samples):
     pid_car1.drive(speed_step_amplitude, initial_track_angle + track_angle_step_amplitude)
     p.update(pid_car1)
 
 # Apply a track angle step to the left keeping the speed target
+print(" Apply a track angle step to the left keeping the speed target: " + str(np.rad2deg(-track_angle_step_amplitude)))
 for x in range(track_angle_step_samples):
     pid_car1.drive(speed_step_amplitude, initial_track_angle - track_angle_step_amplitude)
     p.update(pid_car1)
 
-# Stop the car
+# # Stop the car
+print(" Stop the car ")
 for x in range(speed_step_samples):
     pid_car1.drive(0, initial_track_angle)
     p.update(pid_car1)
