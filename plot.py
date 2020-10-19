@@ -13,13 +13,13 @@ import time
 
 class Plot:
     def __init__(self, blit=False):
-        number_samples = 500
+        number_samples = 1000
         # self.i = 0
         self.blit = blit
 
         # Variables
-        self.x = np.linspace(0, 5., num=number_samples)
-        self.y = [0.] * 24
+        self.x = np.linspace(0, 10., num=number_samples)
+        self.y = [0.] * 14
         # self.y = np.zeros((16, number_samples))
         self.lines = []
 
@@ -29,6 +29,8 @@ class Plot:
         self.steering_deque = np.zeros(number_samples)
         self.speed_set_point_deque = np.zeros(number_samples)
         self.steering_set_point_deque = np.zeros(number_samples)
+        self.track_angle_deque = np.zeros(number_samples)
+        self.track_angle_set_point_deque = np.zeros(number_samples)
 
         self.ang_accel_x_deque = np.zeros(number_samples)
         self.ang_accel_y_deque = np.zeros(number_samples)
@@ -64,44 +66,29 @@ class Plot:
 
     def create_figures(self):
         lw = 1  # Line width
-        
 
         # ----- Figure 1 ----- #
-        self.fig1, self.fig1_axs = plt.subplots(4, 1)
-        self.lines.append(self.fig1_axs[0].plot([], lw=lw, label='Speed')[0])
+        self.fig1, self.fig1_axs = plt.subplots(5, 1)
+        self.lines.append(self.fig1_axs[0].plot([], lw=lw, label='Speed')[0]) #0
         self.lines.append(self.fig1_axs[1].plot([], lw=lw, label='Gear')[0])
         self.lines.append(self.fig1_axs[2].plot([], lw=lw, label='Throttle')[0])
         self.lines.append(self.fig1_axs[3].plot([], lw=lw, label='Steering')[0])
-        self.lines.append(self.fig1_axs[0].plot([], lw=lw, label='Speed SP')[0])
-        self.lines.append(self.fig1_axs[3].plot([], lw=lw, label='Steering SP')[0])
-
-        # ----- Figure 2 ----- #
-        #self.fig2, self.fig2_axs = plt.subplots(4, 1)
-        #self.lines.append(self.fig2_axs[0].plot([], lw=lw, label='Ang_Accel_x')[0])
-        #self.lines.append(self.fig2_axs[0].plot([], lw=lw, label='Ang_Accel_y')[0])
-        #self.lines.append(self.fig2_axs[0].plot([], lw=lw, label='Ang_Accel_z')[0])
-
-        #self.lines.append(self.fig2_axs[1].plot([], lw=lw, label='Ang_Vel_x')[0])
-        #self.lines.append(self.fig2_axs[1].plot([], lw=lw, label='Ang_Vel_y')[0])
-        #self.lines.append(self.fig2_axs[1].plot([], lw=lw, label='Ang_Vel_z')[0])
-
-        #self.lines.append(self.fig2_axs[2].plot([], lw=lw, label='Lin_Accel_x')[0])
-        #self.lines.append(self.fig2_axs[2].plot([], lw=lw, label='Lin_Accel_y')[0])
-        #self.lines.append(self.fig2_axs[2].plot([], lw=lw, label='Lin_Accel_z')[0])
-
-        #elf.lines.append(self.fig2_axs[3].plot([], lw=lw, label='Lin_Vel_x')[0])
-        #self.lines.append(self.fig2_axs[3].plot([], lw=lw, label='Lin_Vel_y')[0])
-        #self.lines.append(self.fig2_axs[3].plot([], lw=lw, label='Lin_Vel_z')[0])
+        self.lines.append(self.fig1_axs[0].plot([], lw=2, label='Speed SP')[0])
+        self.lines.append(self.fig1_axs[3].plot([], lw=2, label='Steering SP')[0]) #5
 
         # ----- Figure 3 ----- #
         self.fig3, self.fig3_axs = plt.subplots(6, 1)
-        self.lines.append(self.fig3_axs[0].plot([], lw=lw, label='Speed Proportional Term')[0])
+        self.lines.append(self.fig3_axs[0].plot([], lw=lw, label='Speed Proportional Term')[0]) #6
         self.lines.append(self.fig3_axs[1].plot([], lw=lw, label='Speed Derivative Term')[0])
         self.lines.append(self.fig3_axs[2].plot([], lw=lw, label='Speed Integral Term')[0])
 
-        self.lines.append(self.fig3_axs[3].plot([], lw=lw, label='Steering Proportional Term')[0])
+        self.lines.append(self.fig3_axs[3].plot([], lw=lw, label='Steering Proportional Term')[0]) #9
         self.lines.append(self.fig3_axs[4].plot([], lw=lw, label='Steering Derivative Term')[0])
         self.lines.append(self.fig3_axs[5].plot([], lw=lw, label='Steering Integral Term')[0])
+
+
+        self.lines.append(self.fig1_axs[4].plot([], lw=lw, label='Track')[0]) #12
+        self.lines.append(self.fig1_axs[4].plot([], lw=2, label='Track SP')[0])
 
         #self.fig2_axs,
         self.figs_axs = [self.fig1_axs,  self.fig3_axs]
@@ -156,21 +143,8 @@ class Plot:
         self.fig1_axs[3].set_ylim([-0.5, 0.5])
         # ax2.legend()
 
-        #self.fig2_axs[0].set_ylabel('Ang. Accel.')
-        # fig2_ax1.set_ylim([-2.5e8, 2.5e8])
-        # ax3.legend()
-
-        #self.fig2_axs[1].set_ylabel('Ang. Vel.')
-        # fig2_ax2.set_ylim([-2.5e8, 2.5e8])
-        # ax3.legend()
-
-        #self.fig2_axs[2].set_ylabel('Lin. Accel.')
-        #self.fig2_axs[2].set_ylim([-10, 10])
-        # ax3.legend()
-
-        #self.fig2_axs[3].set_ylabel('Lin. Vel.')
-        #self.fig2_axs[3].set_ylim([-100, 100])
-        # ax3.legend()
+        self.fig1_axs[4].set_ylabel('Track')
+        self.fig1_axs[4].set_ylim([-95, -85])
 
         self.fig3_axs[0].set_ylabel('Speed P')
         self.fig3_axs[0].set_ylim([-1.1, 1.1])
@@ -222,57 +196,33 @@ class Plot:
         self.steering_derivative_term_deque = np.roll(self.steering_derivative_term_deque, -1)
         self.steering_integral_term_deque = np.roll(self.steering_integral_term_deque, -1)
 
-        self.ang_accel_x_deque = np.roll(self.ang_accel_x_deque, -1)
-        self.ang_accel_y_deque = np.roll(self.ang_accel_y_deque, -1)
-        self.ang_accel_z_deque = np.roll(self.ang_accel_z_deque, -1)
-
-        self.ang_vel_x_deque = np.roll(self.ang_vel_x_deque, -1)
-        self.ang_vel_y_deque = np.roll(self.ang_vel_y_deque, -1)
-        self.ang_vel_z_deque = np.roll(self.ang_vel_z_deque, -1)
-
-        self.lin_accel_x_deque = np.roll(self.lin_accel_x_deque, -1)
-        self.lin_accel_y_deque = np.roll(self.lin_accel_y_deque, -1)
-        self.lin_accel_z_deque = np.roll(self.lin_accel_z_deque, -1)
-
-        self.lin_vel_x_deque = np.roll(self.lin_vel_x_deque, -1)
-        self.lin_vel_y_deque = np.roll(self.lin_vel_y_deque, -1)
-        self.lin_vel_z_deque = np.roll(self.lin_vel_z_deque, -1)
+        self.track_angle_deque = np.roll(self.track_angle_deque, -1)
+        self.track_angle_set_point_deque = np.roll(self.track_angle_set_point_deque, -1)
 
         # Fill Buffers
         self.speed_deque[-1] = car_state.speed
         self.gear_deque[-1] = car_state.gear
         self.throttle_deque[-1] = car_control.throttle
         self.steering_deque[-1] = car_control.steering
-        self.speed_set_point_deque[-1] = car.throttle_controller.pid_controller.SetPoint
+        self.speed_set_point_deque[-1] = car.speed_controller.pid_controller.SetPoint
         self.steering_set_point_deque[-1] = car.steering_controller.pid_controller.SetPoint
 
-        self.speed_proportional_term_deque[-1] = car.throttle_controller.pid_controller.PTerm
-        self.speed_derivative_term_deque[-1] = car.throttle_controller.pid_controller.Kd * \
-                                               car.throttle_controller.pid_controller.DTerm
-        self.speed_integral_term_deque[-1] = car.throttle_controller.pid_controller.Ki * \
-                                             car.throttle_controller.pid_controller.ITerm
+        self.speed_proportional_term_deque[-1] = car.speed_controller.pid_controller.PTerm
+        self.speed_derivative_term_deque[-1] = car.speed_controller.pid_controller.Kd * \
+                                               car.speed_controller.pid_controller.DTerm
+        self.speed_integral_term_deque[-1] = car.speed_controller.pid_controller.Ki * \
+                                             car.speed_controller.pid_controller.ITerm
 
-        self.steering_proportional_term_deque[-1] = car.steering_controller.pid_controller.PTerm
-        self.steering_derivative_term_deque[-1] = car.steering_controller.pid_controller.Kd * \
-                                               car.steering_controller.pid_controller.DTerm
-        self.steering_integral_term_deque[-1] = car.steering_controller.pid_controller.Ki * \
-                                             car.steering_controller.pid_controller.ITerm
+        self.steering_proportional_term_deque[-1] = car.track_angle_controller.pid_controller.PTerm
+        self.steering_derivative_term_deque[-1] = car.track_angle_controller.pid_controller.Kd * \
+                                               car.track_angle_controller.pid_controller.DTerm
+        self.steering_integral_term_deque[-1] = car.track_angle_controller.pid_controller.Ki * \
+                                             car.track_angle_controller.pid_controller.ITerm
 
-        self.ang_accel_x_deque[-1] = car_state.kinematics_estimated.angular_acceleration.x_val
-        self.ang_accel_y_deque[-1] = car_state.kinematics_estimated.angular_acceleration.y_val
-        self.ang_accel_z_deque[-1] = car_state.kinematics_estimated.angular_acceleration.z_val
+      
 
-        self.ang_vel_x_deque[-1] = car_state.kinematics_estimated.angular_velocity.x_val
-        self.ang_vel_y_deque[-1] = car_state.kinematics_estimated.angular_velocity.y_val
-        self.ang_vel_z_deque[-1] = car_state.kinematics_estimated.angular_velocity.z_val
-
-        self.lin_accel_x_deque[-1] = car_state.kinematics_estimated.linear_acceleration.x_val
-        self.lin_accel_y_deque[-1] = car_state.kinematics_estimated.linear_acceleration.y_val
-        self.lin_accel_z_deque[-1] = car_state.kinematics_estimated.linear_acceleration.z_val
-
-        self.lin_vel_x_deque[-1] = car_state.kinematics_estimated.linear_velocity.x_val
-        self.lin_vel_y_deque[-1] = car_state.kinematics_estimated.linear_velocity.y_val
-        self.lin_vel_z_deque[-1] = car_state.kinematics_estimated.linear_velocity.z_val
+        self.track_angle_deque[-1] = np.rad2deg(car.getCurrentTrackAngle())
+        self.track_angle_set_point_deque[-1] = np.rad2deg(car.track_angle_controller.pid_controller.SetPoint)
 
         # Links Data to Outputs
         self.y[0] = self.speed_deque
@@ -290,21 +240,8 @@ class Plot:
         self.y[10] = self.steering_integral_term_deque
         self.y[11] = self.steering_derivative_term_deque
 
-        self.y[12] = self.ang_accel_x_deque
-        self.y[13] = self.ang_accel_y_deque
-        self.y[14] = self.ang_accel_z_deque
-
-        self.y[15] = self.ang_vel_x_deque
-        self.y[16] = self.ang_vel_y_deque
-        self.y[17] = self.ang_vel_z_deque
-
-        self.y[18] = self.lin_accel_x_deque
-        self.y[19] = self.lin_accel_y_deque
-        self.y[20] = self.lin_accel_z_deque
-
-        self.y[21] = self.lin_vel_x_deque
-        self.y[22] = self.lin_vel_y_deque
-        self.y[23] = self.lin_vel_z_deque
+        self.y[12] = self.track_angle_deque
+        self.y[13] = self.track_angle_set_point_deque
 
         # Update Canvas
         for i in range(len(self.lines)):
@@ -345,6 +282,8 @@ class Plot:
             self.fig1_axs[2].draw_artist(self.lines[4])
             self.fig1_axs[3].draw_artist(self.lines[5])
 
+            self.fig1_axs[4].draw_artist(self.lines[12])
+
             #self.fig2_axs[0].draw_artist(self.lines[12])
             #self.fig2_axs[0].draw_artist(self.lines[13])
             #self.fig2_axs[0].draw_artist(self.lines[14])
@@ -368,6 +307,8 @@ class Plot:
             self.fig3_axs[3].draw_artist(self.lines[9])
             self.fig3_axs[4].draw_artist(self.lines[10])
             self.fig3_axs[5].draw_artist(self.lines[11])
+
+            self.fig1_axs[4].draw_artist(self.lines[13])
 
             # Fill in the axes rectangle
             for ax in self.fig1_axs:

@@ -51,7 +51,7 @@ class Car:
                                                                        steering_limits)
 
             self.path_planner = planning.PathPlanner(epsilon=1, sample_time=0.01, number_samples=500, min_distance=3)
-            self.path_planner.update_reference_profile_from_recorded_waypoints(waypoints_x, waypoints_y, waypoints_v)
+            self.path_planner.update_reference_profile_from_recorded_waypoints(self.waypoints_x, self.waypoints_y, self.waypoints_v)
 
             self.pure_pursuit = guidance.Guidance(max_straight_track_speed=20.0, max_curving_speed=15.0,
                                                   max_turning_rate=5.0)
