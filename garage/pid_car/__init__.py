@@ -32,7 +32,7 @@ class Car:
             steering_pid_params = [0.1, 0.00, 0.18]
 
             speed_pid_params = [0.2, 0.03, 0.08]
-            track_angle_pid_params = [0.1, 0.00, 0.18]
+            track_angle_pid_params = [0.99, 0.00, 0.1]
 
             # Lower and upper control limits
             throttle_limits = [-1.0, 1.0]
@@ -120,6 +120,7 @@ class Car:
     def drive(self, speed, track_angle):
         self.updateState()  # update position and other data
         self.updateCarBehavior()  # define the behavior of the car based on conditions
+        self.behavior.mode = 'CRUZE'
 
         # Run Speed PID
         self = self.speed_controller.getControlsFromPID(self, speed)

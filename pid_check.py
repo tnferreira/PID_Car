@@ -20,8 +20,8 @@ speed_step_amplitude = 10.0  # [m/s]
 speed_step_samples = math.floor(speed_step_duration / sample_time)
 
 # Define the track angle step parameters
-track_angle_step_duration = 3  # [s]
-track_angle_step_amplitude = np.deg2rad(3.0)  # [rad]
+track_angle_step_duration = 5  # [s]
+track_angle_step_amplitude = np.deg2rad(6.0)  # [rad]
 track_angle_step_samples = math.floor(track_angle_step_duration / sample_time)
 
 # Create the PID car

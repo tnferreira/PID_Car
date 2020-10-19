@@ -105,10 +105,10 @@ class Plot:
                 ax.set_xlim(self.x.min(), self.x.max())
 
         self.fig1_axs[0].set_ylabel('Speed')
-        self.fig1_axs[0].set_ylim([0., 30.])
+        self.fig1_axs[0].set_ylim([0., 20.])
 
         self.fig1_axs[1].set_ylabel('Throttle')
-        self.fig1_axs[1].set_ylim([-1., 10])
+        self.fig1_axs[1].set_ylim([-1., 1])
 
         self.fig1_axs[2].set_ylabel('Brake')
         self.fig1_axs[2].set_ylim([-1., 1.])
@@ -123,7 +123,7 @@ class Plot:
         self.fig1_axs[5].set_ylim([-1.1, 1.1])
 
         self.fig2_axs[0].set_ylabel('Track Angle')
-        self.fig2_axs[0].set_ylim([-95, -85])
+        self.fig2_axs[0].set_ylim([-100, -80])
 
         self.fig2_axs[1].set_ylabel('Steering')
         self.fig2_axs[1].set_ylim([-0.5, 0.5])
@@ -163,7 +163,7 @@ class Plot:
         self.speed_deque[-1] = car_state.speed
         self.speed_set_point_deque[-1] = car.speed_controller.pid_controller.SetPoint
         self.throttle_deque[-1] = car_control.throttle
-        self.brake_deque[-1] = car_state.brake
+        self.brake_deque[-1] = car_control.brake
 
         self.speed_proportional_term_deque[-1] = car.speed_controller.pid_controller.PTerm
         self.speed_derivative_term_deque[-1] = car.speed_controller.pid_controller.Kd * \
