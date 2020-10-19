@@ -194,4 +194,5 @@ class PIDTrackAngleControl(PIDControl):
         output = self.pid_controller.output
         output = self.limitOutput(output)
         car.controls.steering = output
+        self.pid_controller.SetPoint = target_track_angle  # Store the target track angle
         return car
