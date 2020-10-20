@@ -10,7 +10,7 @@ def updateState(car):
     Here we are returning data from the simulation.
     In the future, we will have to update the state
     using data from sensors. That's why we have this
-    simple funtion here.
+    simple function here.
     '''
     return car.client.getCarState(car.name)
 

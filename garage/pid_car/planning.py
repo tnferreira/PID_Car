@@ -10,6 +10,7 @@ from rdp import rdp
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 
+
 class Waypoints:
     def __init__(self, car_name):
         self.waypoints_list = []

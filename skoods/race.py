@@ -5,8 +5,6 @@
 import airsim, math, time
 
 
-
-
 class Race:
     def __init__(self, sample_time):
 
@@ -34,7 +32,7 @@ class Race:
         if self.mode_input == '2' or self.mode_input == '3':
             pause_simulation_input = input("Type **1** to PAUSE SIMULATION to process data during racing (better performance but takes longer) or "+ \
                                                 "**2** to run the racing in REAL-TIME (worse performance but faster): ")
-            if  pause_simulation_input == '1': # Pause
+            if pause_simulation_input == '1': # Pause
                 print("Race || SIMULATION: Pause")
                 self.pause_simulation = True
                 self.accum_time = 0.0

@@ -5,6 +5,7 @@
 import airsim
 from garage.pid_car import localization, planning, control, guidance
 import numpy as np
+from airsim import utils
 
 
 class Car:
@@ -16,6 +17,7 @@ class Car:
         self.waypoints_correction = waypoints_correction
         self.waypoints = planning.Waypoints(self.name) # Initialize waypoints object
         self.filename = filename
+        self.min_speed = 0.5  # meters per second
 
         if self.mode_input == '2' or self.mode_input == '3': # If Qualify or Race
             self.client.enableApiControl(True, self.name)
@@ -165,12 +167,31 @@ class Car:
         return completed_lap
 
     def getCurrentPostion(self):
+        """
+        Get the current vehicle position with X-Y coordinates in meters.
+
+        :return: The X and Y coordinates.
+        """
         return self.state.kinematics_estimated.position.x_val, self.state.kinematics_estimated.position.y_val
 
     def getCurrentSpeed(self):
+        """
+        Get the current velocity magnitude in meters per second.
+
+        :return: The vehicle speed.
+        """
         return self.state.speed
 
     def getCurrentTrackAngle(self):
-        return np.arctan2(self.state.kinematics_estimated.linear_velocity.y_val,
-                          self.state.kinematics_estimated.linear_velocity.x_val)
+        """
+        Get the current velocity orientation in radians w.r.t. X-axis counter-clockwise.
+
+        :return: The track angle if the speed is greater than a threshold; the vehicle yaw, otherwise.
+        """
+        if self.state.speed > self.min_speed:
+            return np.arctan2(self.state.kinematics_estimated.linear_velocity.y_val,
+                              self.state.kinematics_estimated.linear_velocity.x_val)
+        else:
+            (pitch, roll, yaw) = utils.to_eularian_angles(self.state.kinematics_estimated.orientation)
+            return yaw
 
