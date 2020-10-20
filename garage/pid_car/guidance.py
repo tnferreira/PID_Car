@@ -21,10 +21,12 @@ class Guidance:
         self.max_curving_speed = max_curving_speed
         self.max_turning_rate = max_turning_rate
         self.braking_distance = braking_distance
-        self.last_speed_set_point = []
-        self.speed_set_point_update_rate = 0.7
-        self.last_track_angle_set_point = []
-        self.track_angle_set_point_update_rate = 0.7
+        self.last_speed_set_point = 0.0
+        self.last_speed_set_point_init = False
+        self.speed_set_point_update_rate = 0.5
+        self.last_track_angle_set_point = 0.0
+        self.last_track_angle_set_point_init = False
+        self.track_angle_set_point_update_rate = 0.9
 
     def update_control_targets(self, current_vehicle_position_x, current_vehicle_position_y, current_vehicle_speed,
                                current_vehicle_track_angle, next_waypoint_x, next_waypoint_y, next_waypoint_v):
@@ -65,19 +67,21 @@ class Guidance:
             speed_set_point = self.max_curving_speed
 
         # Speed set point smoother
-        if not self.last_speed_set_point:
+        if self.last_speed_set_point_init:
             speed_set_point = self.speed_set_point_update_rate * speed_set_point +\
                               (1-self.speed_set_point_update_rate) * self.last_speed_set_point
         self.last_speed_set_point = speed_set_point
+        self.last_speed_set_point_init = True
 
         # Simple rule to align the velocity orientation to the next waypoint
         track_angle_set_point = angle_to_next_waypoint
 
         # Track angle set point smoother
-        if not self.last_track_angle_set_point:
-            track_angle_set_point = self.track_angle_set_point_update_rate * track_angle_set_point + \
+        if self.last_track_angle_set_point_init:
+            track_angle_set_point = self.track_angle_set_point_update_rate * track_angle_set_point +\
                                     (1 - self.track_angle_set_point_update_rate) * self.last_track_angle_set_point
         self.last_track_angle_set_point = track_angle_set_point
+        self.last_track_angle_set_point_init = True
 
         # print("speed sp: " + str(speed_set_point) + " angle: "+  str(np.rad2deg(da)) + " [deg]")
         # if(abs(np.rad2deg(da)) <= 1.0):
