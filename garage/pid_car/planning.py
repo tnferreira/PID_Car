@@ -135,6 +135,8 @@ class PathPlanner:
         self.reference_profile_waypoints_x = []
         self.reference_profile_waypoints_y = []
         self.reference_profile_waypoints_v = []
+        self.reference_profile_waypoints_d = []
+        self.reference_profile_waypoints_a = []
 
         # Initialize auxiliary indexes
         self.initial_search_index = 0
@@ -142,6 +144,7 @@ class PathPlanner:
         
         self.fig = []
         self.axs = []
+        self.lc = []
 
     def update_reference_profile_from_recorded_waypoints(self, recorded_waypoints_x, recorded_waypoints_y,
                                                          recorded_waypoints_v):
@@ -173,6 +176,16 @@ class PathPlanner:
         self.reference_profile_waypoints_y = self.recorded_waypoints_y[mask]
         self.reference_profile_waypoints_v = self.recorded_waypoints_v[mask]
 
+        # Compute displacements between consecutive waypoints
+        reference_profile_waypoints_dx = self.reference_profile_waypoints_x - \
+                                         np.roll(self.reference_profile_waypoints_x, -1)
+        reference_profile_waypoints_dy = self.reference_profile_waypoints_y - \
+                                         np.roll(self.reference_profile_waypoints_y, -1)
+
+        # Compute line segments lengths and orientations
+        self.reference_profile_waypoints_d = np.hypot(reference_profile_waypoints_dx, reference_profile_waypoints_dy)
+        self.reference_profile_waypoints_a = np.arctan2(reference_profile_waypoints_dy, reference_profile_waypoints_dx)
+
         # Reset auxiliary indexes
         self.initial_search_index = 0
         self.last_waypoint_index = 0
@@ -186,11 +199,12 @@ class PathPlanner:
         :param current_vehicle_position_y: current vehicle position Y coordinate
         :param current_vehicle_speed: current vehicle velocity magnitude
         :param current_vehicle_track_angle: current vehicle velocity orientation
-        :return: Next waypoint position and velocity; a flag indicating if a new lap was completed
+        :return: Next waypoint position and velocity; current segment length and orientation;
+         a flag indicating if a new lap was completed
         """
         length = len(self.reference_profile_waypoints_v)
         final_search_index = self.initial_search_index + 20 # define as last element
-        if(final_search_index > length-1):
+        if final_search_index > length-1:
             final_search_index = -1
 
         # Roll buffers
@@ -231,16 +245,19 @@ class PathPlanner:
         completed_lap = self.last_waypoint_index > nearest_waypoint_index
         self.last_waypoint_index = nearest_waypoint_index
 
-        print("nearest_waypoint_index: " + str(nearest_waypoint_index))
-        print("last_waypoint_index: " + str(self.last_waypoint_index))
-        #print("initial_search_index: " + str(self.initial_search_index))
+        #  print("nearest_waypoint_index: " + str(nearest_waypoint_index))
+        #  print("last_waypoint_index: " + str(self.last_waypoint_index))
+        #  print("initial_search_index: " + str(self.initial_search_index))
 
         # Get selected waypoint position and speed
         next_waypoint_x = self.reference_profile_waypoints_x[nearest_waypoint_index]
         next_waypoint_y = self.reference_profile_waypoints_y[nearest_waypoint_index]
         next_waypoint_v = self.reference_profile_waypoints_v[nearest_waypoint_index]
 
-        return next_waypoint_x, next_waypoint_y, next_waypoint_v, completed_lap
+        curr_segment_d = self.reference_profile_waypoints_d[nearest_waypoint_index]
+        curr_segment_a = self.reference_profile_waypoints_a[nearest_waypoint_index]
+
+        return next_waypoint_x, next_waypoint_y, next_waypoint_v, curr_segment_d, curr_segment_a, completed_lap
 
     def show_reference_profile(self):
         """
@@ -252,22 +269,24 @@ class PathPlanner:
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
         # Create two axis
-        if(self.fig == []):
+        if self.fig == []:
             self.fig, self.axs = plt.subplots(1, 1)
             
             # Create a continuous norm to map from data points to colors
             norm = plt.Normalize(self.recorded_waypoints_v.min(), self.recorded_waypoints_v.max())
-            lc = LineCollection(segments, cmap='jet', norm=norm)
+            self.lc = LineCollection(segments, cmap='jet', norm=norm)
 
-            # Set the values used for colormapping
-            lc.set_array(self.recorded_waypoints_v)
-            lc.set_linewidth(6)
-            line = self.axs.add_collection(lc)
-            self.fig.colorbar(line, ax=self.axs)
+            # Set the values used for color mapping
+            self.lc.set_array(self.recorded_waypoints_v)
+            self.lc.set_linewidth(6)
         else:
             plt.figure(self.fig.number)
             plt.clf()
             plt.axes(self.axs)
+
+        # Add recorded waypoints
+        line = self.axs.add_collection(self.lc)
+        self.fig.colorbar(line, ax=self.axs)
 
         # Get selected waypoint position and speed
         last_waypoint_x = self.reference_profile_waypoints_x[self.last_waypoint_index]
@@ -281,8 +300,8 @@ class PathPlanner:
         last_vehicle_track_angle = self.vehicle_track_angle[-1]
 
         # Plot recorded position profile
-        #self.axs.set_xlim(self.recorded_waypoints_x.min(), self.recorded_waypoints_x.max())
-        #self.axs.set_ylim(self.recorded_waypoints_y.min(), self.recorded_waypoints_y.max())
+        #  self.axs.set_xlim(self.recorded_waypoints_x.min(), self.recorded_waypoints_x.max())
+        #  self.axs.set_ylim(self.recorded_waypoints_y.min(), self.recorded_waypoints_y.max())
         dist = 100
         self.axs.set_xlim(last_vehicle_position_x-dist, last_vehicle_position_x+dist)
         self.axs.set_ylim(last_vehicle_position_y-dist, last_vehicle_position_y+dist)
@@ -304,5 +323,5 @@ class PathPlanner:
         # axs[1].set_xlabel('t [s]')
         # axs[1].set_ylabel('v [m/s]')
 
-        plt.pause(0.01)
+        plt.pause(0.005)
         #plt.show()

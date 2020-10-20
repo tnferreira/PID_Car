@@ -28,8 +28,13 @@ class Guidance:
         self.last_track_angle_set_point_init = False
         self.track_angle_set_point_update_rate = 0.9
 
+        self.min_segment_length = 5.0
+        self.max_segment_length = 50.0
+
+
     def update_control_targets(self, current_vehicle_position_x, current_vehicle_position_y, current_vehicle_speed,
-                               current_vehicle_track_angle, next_waypoint_x, next_waypoint_y, next_waypoint_v):
+                               current_vehicle_track_angle, next_waypoint_x, next_waypoint_y, next_waypoint_v,
+                               curr_segment_d, curr_segment_a):
         """
         Compute the new speed and track angle control set points according to a modified pure pursuit guidance law.
 
@@ -40,6 +45,8 @@ class Guidance:
         :param next_waypoint_x: next waypoint position X coordinate
         :param next_waypoint_y: next waypoint position Y coordinate
         :param next_waypoint_v: next waypoint velocity magnitude
+        :param curr_segment_d: current line segment length in meters
+        :param curr_segment_a: current line segment orientation in radians
         :return: Updated speed and track angle set points.
         """
 
@@ -61,10 +68,19 @@ class Guidance:
         # speed_set_point = next_waypoint_v
 
         # Simple rule to slow down at curves and go faster at straight tracks
-        if distance_to_next_waypoint > self.braking_distance:
+        #if distance_to_next_waypoint > self.braking_distance:
+        #    speed_set_point = self.max_straight_track_speed
+        #else:
+        #    speed_set_point = self.max_curving_speed
+
+        if curr_segment_d <= self.min_segment_length:
+            speed_set_point = self.max_curving_speed
+        elif curr_segment_d >= self.max_segment_length:
             speed_set_point = self.max_straight_track_speed
         else:
-            speed_set_point = self.max_curving_speed
+            speed_set_point = (curr_segment_d - self.min_segment_length) / \
+                              (self.max_curving_speed - self.min_segment_length) * \
+                              (self.max_straight_track_speed - self.max_curving_speed) + self.max_curving_speed
 
         # Speed set point smoother
         if self.last_speed_set_point_init:

@@ -148,8 +148,11 @@ class Car:
         current_vehicle_track_angle = self.getCurrentTrackAngle()
 
         # Get next waypoint
-        next_waypoint_x, next_waypoint_y, next_waypoint_v, completed_lap = self.path_planner.get_next_reference_profile_waypoint(
-            current_vehicle_position_x, current_vehicle_position_y, current_vehicle_speed, current_vehicle_track_angle)
+        next_waypoint_x, next_waypoint_y, next_waypoint_v, curr_segment_d, curr_segment_a, completed_lap = \
+            self.path_planner.get_next_reference_profile_waypoint(current_vehicle_position_x,
+                                                                  current_vehicle_position_y,
+                                                                  current_vehicle_speed,
+                                                                  current_vehicle_track_angle)
         #  print("x: " + str(next_waypoint_x) + " y: "+  str(next_waypoint_y) + " v: " + str(next_waypoint_v))
 
         # Show profile
@@ -163,7 +166,9 @@ class Car:
                                                                                           current_vehicle_track_angle,
                                                                                           next_waypoint_x,
                                                                                           next_waypoint_y,
-                                                                                          next_waypoint_v)
+                                                                                          next_waypoint_v,
+                                                                                          curr_segment_d,
+                                                                                          curr_segment_a)
         #  print("speed sp: " + str(speed_set_point) + " angle: "+  str(np.rad2deg(track_angle_set_point)) + " [deg]")
 
         # Run Speed PID
