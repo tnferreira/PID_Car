@@ -139,6 +139,9 @@ class PathPlanner:
         # Initialize auxiliary indexes
         self.initial_search_index = 0
         self.last_waypoint_index = 0
+        
+        self.fig = []
+        self.axs = []
 
     def update_reference_profile_from_recorded_waypoints(self, recorded_waypoints_x, recorded_waypoints_y,
                                                          recorded_waypoints_v):
@@ -230,7 +233,7 @@ class PathPlanner:
 
         print("nearest_waypoint_index: " + str(nearest_waypoint_index))
         print("last_waypoint_index: " + str(self.last_waypoint_index))
-        print("initial_search_index: " + str(self.initial_search_index))
+        #print("initial_search_index: " + str(self.initial_search_index))
 
         # Get selected waypoint position and speed
         next_waypoint_x = self.reference_profile_waypoints_x[nearest_waypoint_index]
@@ -244,23 +247,27 @@ class PathPlanner:
         Plot the reference profile along the recorded points; indicates the next waypoint and the vehicle trajectory.
         :return: None
         """
-
         # Get recorded points as line segments
         points = np.array([self.recorded_waypoints_x, self.recorded_waypoints_y]).T.reshape(-1, 1, 2)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
         # Create two axis
-        fig, axs = plt.subplots(2, 1)
+        if(self.fig == []):
+            self.fig, self.axs = plt.subplots(1, 1)
+            
+            # Create a continuous norm to map from data points to colors
+            norm = plt.Normalize(self.recorded_waypoints_v.min(), self.recorded_waypoints_v.max())
+            lc = LineCollection(segments, cmap='jet', norm=norm)
 
-        # Create a continuous norm to map from data points to colors
-        norm = plt.Normalize(self.recorded_waypoints_v.min(), self.recorded_waypoints_v.max())
-        lc = LineCollection(segments, cmap='jet', norm=norm)
-
-        # Set the values used for colormapping
-        lc.set_array(self.recorded_waypoints_v)
-        lc.set_linewidth(6)
-        line = axs[0].add_collection(lc)
-        fig.colorbar(line, ax=axs[0])
+            # Set the values used for colormapping
+            lc.set_array(self.recorded_waypoints_v)
+            lc.set_linewidth(6)
+            line = self.axs.add_collection(lc)
+            self.fig.colorbar(line, ax=self.axs)
+        else:
+            plt.figure(self.fig.number)
+            plt.clf()
+            plt.axes(self.axs)
 
         # Get selected waypoint position and speed
         last_waypoint_x = self.reference_profile_waypoints_x[self.last_waypoint_index]
@@ -274,18 +281,28 @@ class PathPlanner:
         last_vehicle_track_angle = self.vehicle_track_angle[-1]
 
         # Plot recorded position profile
-        axs[0].set_xlim(self.recorded_waypoints_x.min(), self.recorded_waypoints_x.max())
-        axs[0].set_ylim(self.recorded_waypoints_y.min(), self.recorded_waypoints_y.max())
-        axs[0].set_xlabel('x [m]')
-        axs[0].set_ylabel('y [m]')
-        axs[0].plot(self.reference_profile_waypoints_x, self.reference_profile_waypoints_y, 'k--', marker='o')
-        axs[0].plot([last_vehicle_position_x, last_waypoint_x], [last_vehicle_position_y, last_waypoint_y], 'g-', marker='o')
+        #self.axs.set_xlim(self.recorded_waypoints_x.min(), self.recorded_waypoints_x.max())
+        #self.axs.set_ylim(self.recorded_waypoints_y.min(), self.recorded_waypoints_y.max())
+        dist = 100
+        self.axs.set_xlim(last_vehicle_position_x-dist, last_vehicle_position_x+dist)
+        self.axs.set_ylim(last_vehicle_position_y-dist, last_vehicle_position_y+dist)
+        self.axs.set_xlabel('x [m]')
+        self.axs.set_ylabel('y [m]')
+        self.axs.plot(self.reference_profile_waypoints_x, self.reference_profile_waypoints_y, 'k--', marker='o', markersize=4)
+        self.axs.plot([last_vehicle_position_x, last_waypoint_x], [last_vehicle_position_y, last_waypoint_y], 'g-', marker='o')
+        self.axs.plot(self.vehicle_position_x, self.vehicle_position_y, 'b--')
+        # idx = 0
+        # sp = 0.05
+        # for i,j in zip(self.reference_profile_waypoints_x, self.reference_profile_waypoints_y):
+        #     axs.annotate(str(idx), xy=(i+sp,j+sp))
+        #     idx += 1
 
         # Plot recorded speed profile
-        axs[1].plot(self.recorded_waypoints_t, self.recorded_waypoints_v)
-        axs[1].set_xlim(self.recorded_waypoints_t.min(), self.recorded_waypoints_t.max())
-        axs[1].set_ylim(self.recorded_waypoints_v.min(), self.recorded_waypoints_v.max())
-        axs[1].set_xlabel('t [s]')
-        axs[1].set_ylabel('v [m/s]')
+        # axs[1].plot(self.recorded_waypoints_t, self.recorded_waypoints_v)
+        # axs[1].set_xlim(self.recorded_waypoints_t.min(), self.recorded_waypoints_t.max())
+        # axs[1].set_ylim(self.recorded_waypoints_v.min(), self.recorded_waypoints_v.max())
+        # axs[1].set_xlabel('t [s]')
+        # axs[1].set_ylabel('v [m/s]')
 
-        plt.show()
+        plt.pause(0.01)
+        #plt.show()

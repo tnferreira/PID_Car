@@ -52,7 +52,7 @@ class Car:
             self.track_angle_controller = control.PIDTrackAngleControl(self, track_angle_pid_params, self.sample_time,
                                                                        steering_limits)
 
-            self.path_planner = planning.PathPlanner(epsilon=0.25, sample_time=0.01, number_samples=500, min_distance=3)
+            self.path_planner = planning.PathPlanner(epsilon=0.1, sample_time=0.25, number_samples=500, min_distance=6)
             self.path_planner.update_reference_profile_from_recorded_waypoints(self.waypoints_x, self.waypoints_y, self.waypoints_v)
 
             self.pure_pursuit = guidance.Guidance(max_straight_track_speed=20.0, max_curving_speed=15.0,
@@ -146,7 +146,7 @@ class Car:
         next_waypoint_x, next_waypoint_y, next_waypoint_v, completed_lap = self.path_planner.get_next_reference_profile_waypoint(
             current_vehicle_position_x, current_vehicle_position_y, current_vehicle_speed, current_vehicle_track_angle)
         #print("x: " + str(next_waypoint_x) + " y: "+  str(next_waypoint_y) + " v: " + str(next_waypoint_v))
-        
+        self.path_planner.show_reference_profile()
         # Compute speed and track angle set points
         speed_set_point, track_angle_set_point = self.pure_pursuit.update_control_targets(current_vehicle_position_x,
                                                                                           current_vehicle_position_y,
@@ -155,7 +155,6 @@ class Car:
                                                                                           next_waypoint_x,
                                                                                           next_waypoint_y,
                                                                                           next_waypoint_v)
-
         #print("speed sp: " + str(speed_set_point) + " angle: "+  str(np.rad2deg(track_angle_set_point)) + " [deg]")
         # Run Speed PID
         self = self.speed_controller.getControlsFromPID(self, speed_set_point)

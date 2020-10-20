@@ -1,5 +1,6 @@
 from matplotlib import pyplot as plt
 import numpy as np
+import math
 
 class Guidance:
     """
@@ -18,6 +19,8 @@ class Guidance:
         self.max_straight_track_speed = max_straight_track_speed
         self.max_curving_speed = max_curving_speed
         self.max_turning_rate = max_turning_rate
+        self.last_speed_set_point = 0.0
+        self.speed_learn_rate = 0.7
 
     def update_control_targets(self, current_vehicle_position_x, current_vehicle_position_y, current_vehicle_speed,
                                current_vehicle_track_angle, next_waypoint_x, next_waypoint_y, next_waypoint_v):
@@ -43,9 +46,23 @@ class Guidance:
         angle_to_next_waypoint = np.arctan2(dy, dx)
 
         dv = next_waypoint_v - current_vehicle_speed
-        da = np.unwrap([angle_to_next_waypoint - current_vehicle_track_angle])[0]
+        da = angle_to_next_waypoint - current_vehicle_track_angle
+        while (da > math.pi):
+            da -= 2*math.pi
+        while (da < -math.pi):
+            da += 2*math.pi
 
-        speed_set_point = next_waypoint_v
+
+        #speed_set_point = next_waypoint_v
+        speed_set_point = self.speed_learn_rate * next_waypoint_v + (1-self.speed_learn_rate) * self.last_speed_set_point
+        self.last_speed_set_point = speed_set_point
         track_angle_set_point = angle_to_next_waypoint
+
+        print("speed sp: " + str(speed_set_point) + " angle: "+  str(np.rad2deg(da)) + " [deg]")
+        # if(abs(np.rad2deg(da)) <= 1.0):
+        #     speed_set_point = speed_set_point * 1.5
+        
+        # if(speed_set_point>self.max_straight_track_speed):
+        #     speed_set_point = self.max_straight_track_speed
 
         return speed_set_point, track_angle_set_point
