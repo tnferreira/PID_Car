@@ -5,12 +5,12 @@
 # import airsim
 from skoods import race
 from garage import pid_car
+from plot import Plot
 
 # Connect to Skoods simulation
-sample_time = 0.01  # Define the sample time to perform all processing.
-#sample_time = 0.01  # Define the sample time to perform all processing.
+sample_time = 0.01 # Define the sample time to perform all processing.
 race = race.Race(sample_time)
-race.client.reset()
+showPlots = True
 speedy = True
  
 ### INITIALIZE CARS
@@ -19,7 +19,7 @@ speedy = True
 # OPTION A: Qualify and record waypoints
 # Need to change the settings.json file. Check the JSON_examples folder
 '''
-pid_car1 = pid_car.Car(race.client, race.sample_time, 'SetCarName1', race.mode_input, filename='run-fast4.pickle', show_profile=False, show_pid=True) # Give the car the name you want
+pid_car1 = pid_car.Car(race.client, race.sample_time, 'SetCarName1', race.mode_input, filename='run-fast4.pickle') # Give the car the name you want
 cars = [pid_car1]
 
 '''
@@ -43,16 +43,18 @@ elif race.mode_input == '2' or race.mode_input == '3':
     race.setCars(cars)
     race.setInitialTime()
     keep_racing = True
-
+    if showPlots:
+        p = Plot(blit=True)
     while(keep_racing):
         for each_car in cars:
             ### RUN YOUR CODE HERE
             if speedy:
-                keep_racing_from_car = each_car.speedy_race()
+                keep_racing_from_car = each_car.speedyRace()
             else:
                 keep_racing_from_car = each_car.race()  # keep_racing_from_car not being used, but I will leave here just in case
-
-            ### END HERE
+            if showPlots:
+                p.update(each_car)
+            ### END HERE3
         race.playSimulation() # Will check for mode
         keep_racing_from_race = race.updateRaceParameters()
         keep_racing = (keep_racing_from_car and keep_racing_from_race) # you can add more interruptions if needed

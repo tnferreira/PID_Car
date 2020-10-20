@@ -15,13 +15,13 @@ car_controls = airsim.CarControls()
 sample_time = 0.01  # [s]
 
 # Define the speed step parameters
-speed_step_duration = 10  # [s]
+speed_step_duration = 5  # [s]
 speed_step_amplitude = 10.0  # [m/s]
 speed_step_samples = math.floor(speed_step_duration / sample_time)
 
 # Define the track angle step parameters
-track_angle_step_duration = 5  # [s]
-track_angle_step_amplitude = np.deg2rad(15.0)  # [rad]
+track_angle_step_duration = 3  # [s]
+track_angle_step_amplitude = np.deg2rad(2.5)  # [rad]
 track_angle_step_samples = math.floor(track_angle_step_duration / sample_time)
 
 # Create the PID car
@@ -61,5 +61,6 @@ for x in range(speed_step_samples):
 pid_car1.resetControls()
 
 # Restore to original car state
+time.sleep(60)
 client.reset()
 client.enableApiControl(False)
