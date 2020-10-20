@@ -18,7 +18,7 @@ speedy = True
 # OPTION A: Qualify and record waypoints
 # Need to change the settings.json file. Check the JSON_examples folder
 '''
-pid_car1 = pid_car.Car(race.client, race.sample_time, 'SetCarName1', race.mode_input, filename='run-fast4.pickle') # Give the car the name you want
+pid_car1 = pid_car.Car(race.client, race.sample_time, 'SetCarName1', race.mode_input, filename='run-fast4.pickle', show_profile=False, show_pid=False) # Give the car the name you want
 cars = [pid_car1]
 
 '''
@@ -47,7 +47,7 @@ elif race.mode_input == '2' or race.mode_input == '3':
         for each_car in cars:
             ### RUN YOUR CODE HERE
             if speedy:
-                keep_racing_from_car = each_car.speedy_race(show_profile=True, show_pid=True)
+                keep_racing_from_car = each_car.speedy_race()
             else:
                 keep_racing_from_car = each_car.race()  # keep_racing_from_car not being used, but I will leave here just in case
 

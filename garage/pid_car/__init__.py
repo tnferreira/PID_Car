@@ -9,7 +9,7 @@ from airsim import utils
 from plot import Plot
 
 class Car:
-    def __init__(self, client, sample_time, car_name, mode_input, waypoints_correction=[0, 0], filename = 'something.pickle'):
+    def __init__(self, client, sample_time, car_name, mode_input, waypoints_correction=[0, 0], filename = 'something.pickle', show_profile=False, show_pid=False):
         self.client = client
         self.sample_time = sample_time
         self.name = car_name
@@ -58,7 +58,10 @@ class Car:
             self.pure_pursuit = guidance.Guidance(max_straight_track_speed=20.0, max_curving_speed=8.0,
                                                   max_turning_rate=5.0, braking_distance=10.0)
 
-            self.pid_plot = Plot(blit=True)
+            self.show_profile = show_profile
+            self.show_pid = show_pid
+            if show_pid:
+                self.pid_plot = Plot(blit=True)
         
         else:  # Record Waypoints
             self.recordWaypointsToFile()
@@ -131,7 +134,7 @@ class Car:
         # Send controls to simulation
         self.setControls()
 
-    def speedy_race(self, show_profile=False, show_pid=False):
+    def speedy_race(self):
         """
         Run the car faster using alternative PID controllers.
 
@@ -156,7 +159,7 @@ class Car:
         #  print("x: " + str(next_waypoint_x) + " y: "+  str(next_waypoint_y) + " v: " + str(next_waypoint_v))
 
         # Show profile
-        if show_profile:
+        if self.show_profile:
             self.path_planner.show_reference_profile()
 
         # Compute speed and track angle set points
@@ -181,7 +184,7 @@ class Car:
         self.setControls()
 
         # Show PIDs
-        if show_pid:
+        if self.show_pid:
             self.pid_plot.update(self)
 
         return True

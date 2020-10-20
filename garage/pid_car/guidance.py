@@ -81,7 +81,7 @@ class Guidance:
             speed_set_point = (curr_segment_d - self.min_segment_length) / \
                               (self.max_segment_length - self.min_segment_length) * \
                               (self.max_straight_track_speed - self.max_curving_speed) + self.max_curving_speed
-        print("speed sp: " + str(speed_set_point))
+        # print("speed sp: " + str(speed_set_point))
 
         # Speed set point smoother
         if self.last_speed_set_point_init:
@@ -100,7 +100,7 @@ class Guidance:
         self.last_track_angle_set_point = track_angle_set_point
         self.last_track_angle_set_point_init = True
 
-        print("speed sp: " + str(speed_set_point) + " angle: "+  str(np.rad2deg(da)) + " [deg]")
+        # print("speed sp: " + str(speed_set_point) + " angle: "+  str(np.rad2deg(da)) + " [deg]")
         # if(abs(np.rad2deg(da)) <= 1.0):
         #     speed_set_point = speed_set_point * 1.5
         
