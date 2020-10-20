@@ -8,19 +8,23 @@ class Guidance:
     state and the reference trajectory.
     """
 
-    def __init__(self, max_straight_track_speed=20.0, max_curving_speed=15.0, max_turning_rate=5.0):
+    def __init__(self, max_straight_track_speed=20.0, max_curving_speed=7.5, max_turning_rate=5.0, braking_distance=10.0):
         """
         Class constructor.
 
         :param max_straight_track_speed: maximum allowed velocity magnitude along straight tracks in meter per second
         :param max_curving_speed: maximum allowed velocity magnitude along curves in meters per second
         :param max_turning_rate: maximum allowed turning rate in degrees per second
-       """
+        :param braking_distance: braking distance to slow down at curves in meters
+      """
         self.max_straight_track_speed = max_straight_track_speed
         self.max_curving_speed = max_curving_speed
         self.max_turning_rate = max_turning_rate
-        self.last_speed_set_point = 0.0
-        self.speed_learn_rate = 0.7
+        self.braking_distance = braking_distance
+        self.last_speed_set_point = []
+        self.speed_set_point_update_rate = 0.7
+        self.last_track_angle_set_point = []
+        self.track_angle_set_point_update_rate = 0.7
 
     def update_control_targets(self, current_vehicle_position_x, current_vehicle_position_y, current_vehicle_speed,
                                current_vehicle_track_angle, next_waypoint_x, next_waypoint_y, next_waypoint_v):
@@ -52,13 +56,30 @@ class Guidance:
         while (da < -math.pi):
             da += 2*math.pi
 
+        # speed_set_point = next_waypoint_v
 
-        #speed_set_point = next_waypoint_v
-        speed_set_point = self.speed_learn_rate * next_waypoint_v + (1-self.speed_learn_rate) * self.last_speed_set_point
+        # Simple rule to slow down at curves and go faster at straight tracks
+        if distance_to_next_waypoint > self.braking_distance:
+            speed_set_point = self.max_straight_track_speed
+        else:
+            speed_set_point = self.max_curving_speed
+
+        # Speed set point smoother
+        if not self.last_speed_set_point:
+            speed_set_point = self.speed_set_point_update_rate * speed_set_point +\
+                              (1-self.speed_set_point_update_rate) * self.last_speed_set_point
         self.last_speed_set_point = speed_set_point
+
+        # Simple rule to align the velocity orientation to the next waypoint
         track_angle_set_point = angle_to_next_waypoint
 
-        print("speed sp: " + str(speed_set_point) + " angle: "+  str(np.rad2deg(da)) + " [deg]")
+        # Track angle set point smoother
+        if not self.last_track_angle_set_point:
+            track_angle_set_point = self.track_angle_set_point_update_rate * track_angle_set_point + \
+                                    (1 - self.track_angle_set_point_update_rate) * self.last_track_angle_set_point
+        self.last_track_angle_set_point = track_angle_set_point
+
+        # print("speed sp: " + str(speed_set_point) + " angle: "+  str(np.rad2deg(da)) + " [deg]")
         # if(abs(np.rad2deg(da)) <= 1.0):
         #     speed_set_point = speed_set_point * 1.5
         

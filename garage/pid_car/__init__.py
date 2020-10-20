@@ -6,7 +6,7 @@ import airsim
 from garage.pid_car import localization, planning, control, guidance
 import numpy as np
 from airsim import utils
-
+from plot import Plot
 
 class Car:
     def __init__(self, client, sample_time, car_name, mode_input, waypoints_correction=[0, 0], filename = 'something.pickle'):
@@ -52,15 +52,16 @@ class Car:
             self.track_angle_controller = control.PIDTrackAngleControl(self, track_angle_pid_params, self.sample_time,
                                                                        steering_limits)
 
-            self.path_planner = planning.PathPlanner(epsilon=0.1, sample_time=0.25, number_samples=500, min_distance=6)
+            self.path_planner = planning.PathPlanner(epsilon=0.25, sample_time=0.01, number_samples=500, min_distance=6)
             self.path_planner.update_reference_profile_from_recorded_waypoints(self.waypoints_x, self.waypoints_y, self.waypoints_v)
 
-            self.pure_pursuit = guidance.Guidance(max_straight_track_speed=20.0, max_curving_speed=15.0,
-                                                  max_turning_rate=5.0)
+            self.pure_pursuit = guidance.Guidance(max_straight_track_speed=20.0, max_curving_speed=7.5,
+                                                  max_turning_rate=5.0, braking_distance=10.0)
+
+            self.pid_plot = Plot(blit=True)
         
         else:  # Record Waypoints
             self.recordWaypointsToFile()
-
 
     def resetControls(self):
         self.controls = airsim.CarControls()
@@ -99,7 +100,6 @@ class Car:
             print(self.name + " || WARNING: WAYPOINTS - Waypoints out of range. You didn't complete the lap :(")
         return keep_racing
 
-
     def setControls(self):
         # After updating the controls, we have to set the controls to update the simulation
         # We are also handling what to do with different behavior modes here
@@ -111,13 +111,11 @@ class Car:
             # self.controls.steering = 0.0
             self.client.setCarControls(self.controls, self.name)
 
-
     def race(self):
         self.updateState() # update position and other data
         self.updateCarBehavior() # define the behavior of the car based on conditions
         keep_racing = self.updateControls() # return false if waypoints reach final index
         return keep_racing
-
 
     def drive(self, speed, track_angle):
         self.updateState()  # update position and other data
@@ -133,7 +131,14 @@ class Car:
         # Send controls to simulation
         self.setControls()
 
-    def speedy_race(self):
+    def speedy_race(self, show_profile=False, show_pid=False):
+        """
+        Run the car faster using alternative PID controllers.
+
+        :param show_profile: flag to enable the reference profile and vehicle trajectory visualization
+        :param show_pid: flag to enable the PID controller input / output visualization
+        :return:
+        """
         self.updateState()  # update position and other data
         self.updateCarBehavior()  # define the behavior of the car based on conditions
 
@@ -145,8 +150,12 @@ class Car:
         # Get next waypoint
         next_waypoint_x, next_waypoint_y, next_waypoint_v, completed_lap = self.path_planner.get_next_reference_profile_waypoint(
             current_vehicle_position_x, current_vehicle_position_y, current_vehicle_speed, current_vehicle_track_angle)
-        #print("x: " + str(next_waypoint_x) + " y: "+  str(next_waypoint_y) + " v: " + str(next_waypoint_v))
-        self.path_planner.show_reference_profile()
+        #  print("x: " + str(next_waypoint_x) + " y: "+  str(next_waypoint_y) + " v: " + str(next_waypoint_v))
+
+        # Show profile
+        if show_profile:
+            self.path_planner.show_reference_profile()
+
         # Compute speed and track angle set points
         speed_set_point, track_angle_set_point = self.pure_pursuit.update_control_targets(current_vehicle_position_x,
                                                                                           current_vehicle_position_y,
@@ -155,7 +164,8 @@ class Car:
                                                                                           next_waypoint_x,
                                                                                           next_waypoint_y,
                                                                                           next_waypoint_v)
-        #print("speed sp: " + str(speed_set_point) + " angle: "+  str(np.rad2deg(track_angle_set_point)) + " [deg]")
+        #  print("speed sp: " + str(speed_set_point) + " angle: "+  str(np.rad2deg(track_angle_set_point)) + " [deg]")
+
         # Run Speed PID
         self = self.speed_controller.getControlsFromPID(self, speed_set_point)
 
@@ -164,6 +174,10 @@ class Car:
 
         # Send controls to simulation
         self.setControls()
+
+        # Show PIDs
+        if show_pid:
+            self.pid_plot.update(self)
 
         return True
 
