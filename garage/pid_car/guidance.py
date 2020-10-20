@@ -43,7 +43,7 @@ class Guidance:
         angle_to_next_waypoint = np.arctan2(dy, dx)
 
         dv = next_waypoint_v - current_vehicle_speed
-        da = np.unwrap(angle_to_next_waypoint - current_vehicle_track_angle)
+        da = np.unwrap([angle_to_next_waypoint - current_vehicle_track_angle])[0]
 
         speed_set_point = next_waypoint_v
         track_angle_set_point = angle_to_next_waypoint

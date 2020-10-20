@@ -186,7 +186,9 @@ class PathPlanner:
         :return: Next waypoint position and velocity; a flag indicating if a new lap was completed
         """
         length = len(self.reference_profile_waypoints_v)
-        final_search_index = -1  # define as last element
+        final_search_index = self.initial_search_index + 20 # define as last element
+        if(final_search_index > length-1):
+            final_search_index = -1
 
         # Roll buffers
         self.vehicle_position_x = np.roll(self.vehicle_position_x, -1)
@@ -220,15 +222,15 @@ class PathPlanner:
         if nearest_waypoint_index >= length - 2:
             self.initial_search_index = 0
         else:
-            self.initial_search_index = nearest_waypoint_index + 1
+            self.initial_search_index = nearest_waypoint_index
 
         # Check whether the lap was completed or not
         completed_lap = self.last_waypoint_index > nearest_waypoint_index
         self.last_waypoint_index = nearest_waypoint_index
 
-        #  print("nearest_waypoint_index: " + str(nearest_waypoint_index))
-        #  print("last_waypoint_index: " + str(self.last_waypoint_index))
-        #  print("initial_search_index: " + str(self.initial_search_index))
+        print("nearest_waypoint_index: " + str(nearest_waypoint_index))
+        print("last_waypoint_index: " + str(self.last_waypoint_index))
+        print("initial_search_index: " + str(self.initial_search_index))
 
         # Get selected waypoint position and speed
         next_waypoint_x = self.reference_profile_waypoints_x[nearest_waypoint_index]

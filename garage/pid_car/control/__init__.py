@@ -182,7 +182,12 @@ class PIDTrackAngleControl(PIDControl):
         current_track_angle = car.getCurrentTrackAngle()
 
         # Compute the track angle error properly
-        track_angle_error = np.unwrap([target_track_angle - current_track_angle])[0]
+        track_angle_error = target_track_angle - current_track_angle
+        while (track_angle_error > math.pi):
+            track_angle_error -= 2*math.pi
+        while (track_angle_error < -math.pi):
+            track_angle_error += 2*math.pi
+        #track_angle_error = np.unwrap([target_track_angle - current_track_angle])[0]
         # print("target_track_angle: " + str(np.rad2deg(target_track_angle)) + " [deg]")
         # print("current_track_angle: " + str(np.rad2deg(current_track_angle)) + " [deg]")
         # print("track_angle_error: " + str(np.rad2deg(track_angle)) + " [deg]")

@@ -114,28 +114,28 @@ class Plot:
         self.fig1_axs[2].set_ylim([-1., 1.])
 
         self.fig1_axs[3].set_ylabel('Speed P')
-        self.fig1_axs[3].set_ylim([-1.1, 1.1])
+        self.fig1_axs[3].set_ylim([-1.5, 1.5])
 
         self.fig1_axs[4].set_ylabel('Speed I')
-        self.fig1_axs[4].set_ylim([-1.1, 1.1])
+        self.fig1_axs[4].set_ylim([-1.5, 1.5])
 
         self.fig1_axs[5].set_ylabel('Speed D')
-        self.fig1_axs[5].set_ylim([-1.1, 1.1])
+        self.fig1_axs[5].set_ylim([-1.5, 1.5])
 
         self.fig2_axs[0].set_ylabel('Track Angle')
-        self.fig2_axs[0].set_ylim([-100, -80])
+        self.fig2_axs[0].set_ylim([-180, 180])
 
         self.fig2_axs[1].set_ylabel('Steering')
         self.fig2_axs[1].set_ylim([-0.5, 0.5])
 
         self.fig2_axs[2].set_ylabel('Steering P')
-        self.fig2_axs[2].set_ylim([-1, 1])
+        self.fig2_axs[2].set_ylim([-1.5, 1.5])
 
         self.fig2_axs[3].set_ylabel('Steering I')
-        self.fig2_axs[3].set_ylim([-1, 1])
+        self.fig2_axs[3].set_ylim([-1.5, 1.5])
 
         self.fig2_axs[4].set_ylabel('Steering D')
-        self.fig2_axs[4].set_ylim([-1, 1])
+        self.fig2_axs[4].set_ylim([-1.5, 1.5])
 
     def update(self, car):
         car_state = car.state
