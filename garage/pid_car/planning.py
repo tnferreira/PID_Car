@@ -178,13 +178,15 @@ class PathPlanner:
 
         # Compute displacements between consecutive waypoints
         reference_profile_waypoints_dx = self.reference_profile_waypoints_x - \
-                                         np.roll(self.reference_profile_waypoints_x, -1)
+                                         np.roll(self.reference_profile_waypoints_x, 1)
         reference_profile_waypoints_dy = self.reference_profile_waypoints_y - \
-                                         np.roll(self.reference_profile_waypoints_y, -1)
+                                         np.roll(self.reference_profile_waypoints_y, 1)
 
         # Compute line segments lengths and orientations
         self.reference_profile_waypoints_d = np.hypot(reference_profile_waypoints_dx, reference_profile_waypoints_dy)
         self.reference_profile_waypoints_a = np.arctan2(reference_profile_waypoints_dy, reference_profile_waypoints_dx)
+        self.reference_profile_waypoints_d[0] = 100.0
+        self.reference_profile_waypoints_a[0] = -math.pi
 
         # Reset auxiliary indexes
         self.initial_search_index = 0
@@ -279,14 +281,13 @@ class PathPlanner:
             # Set the values used for color mapping
             self.lc.set_array(self.recorded_waypoints_v)
             self.lc.set_linewidth(6)
+            # Add recorded waypoints
+            line = self.axs.add_collection(self.lc)
+            self.fig.colorbar(line, ax=self.axs)
         else:
             plt.figure(self.fig.number)
             plt.clf()
             plt.axes(self.axs)
-
-        # Add recorded waypoints
-        line = self.axs.add_collection(self.lc)
-        self.fig.colorbar(line, ax=self.axs)
 
         # Get selected waypoint position and speed
         last_waypoint_x = self.reference_profile_waypoints_x[self.last_waypoint_index]

@@ -23,13 +23,13 @@ class Guidance:
         self.braking_distance = braking_distance
         self.last_speed_set_point = 0.0
         self.last_speed_set_point_init = False
-        self.speed_set_point_update_rate = 0.5
+        self.speed_set_point_update_rate = 0.1
         self.last_track_angle_set_point = 0.0
         self.last_track_angle_set_point_init = False
         self.track_angle_set_point_update_rate = 0.9
 
         self.min_segment_length = 5.0
-        self.max_segment_length = 50.0
+        self.max_segment_length = 100.0
 
 
     def update_control_targets(self, current_vehicle_position_x, current_vehicle_position_y, current_vehicle_speed,
@@ -79,8 +79,9 @@ class Guidance:
             speed_set_point = self.max_straight_track_speed
         else:
             speed_set_point = (curr_segment_d - self.min_segment_length) / \
-                              (self.max_curving_speed - self.min_segment_length) * \
+                              (self.max_segment_length - self.min_segment_length) * \
                               (self.max_straight_track_speed - self.max_curving_speed) + self.max_curving_speed
+        print("speed sp: " + str(speed_set_point))
 
         # Speed set point smoother
         if self.last_speed_set_point_init:
@@ -99,7 +100,7 @@ class Guidance:
         self.last_track_angle_set_point = track_angle_set_point
         self.last_track_angle_set_point_init = True
 
-        # print("speed sp: " + str(speed_set_point) + " angle: "+  str(np.rad2deg(da)) + " [deg]")
+        print("speed sp: " + str(speed_set_point) + " angle: "+  str(np.rad2deg(da)) + " [deg]")
         # if(abs(np.rad2deg(da)) <= 1.0):
         #     speed_set_point = speed_set_point * 1.5
         
