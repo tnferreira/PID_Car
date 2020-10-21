@@ -27,8 +27,9 @@ class Guidance:
         self.last_track_angle_set_point = 0.0
         self.last_track_angle_set_point_init = False
         self.track_angle_set_point_update_rate = 0.9
+        #self.track_angle_set_point_update_rate = 0.45
 
-        self.min_segment_length = 5.0
+        self.min_segment_length = 20.0
         self.max_segment_length = 100.0
 
 

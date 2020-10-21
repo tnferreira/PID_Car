@@ -105,7 +105,7 @@ class Plot:
                 ax.set_xlim(self.x.min(), self.x.max())
 
         self.fig1_axs[0].set_ylabel('Speed')
-        self.fig1_axs[0].set_ylim([0., 20.])
+        self.fig1_axs[0].set_ylim([0., 30.])
 
         self.fig1_axs[1].set_ylabel('Throttle')
         self.fig1_axs[1].set_ylim([-1., 1])

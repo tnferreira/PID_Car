@@ -33,7 +33,7 @@ class Car:
             throttle_pid_params = [0.2, 0.03, 0.08]
             steering_pid_params = [0.1, 0.00, 0.18]
 
-            speed_pid_params = [0.4, 0.03, 0.08]
+            speed_pid_params = [0.6, 0.03, 0.08]
             #speed_pid_params = [0.2, 0.03, 0.08]
             
             track_angle_pid_params = [0.99, 0.02, 0.1]
@@ -56,10 +56,10 @@ class Car:
             self.track_angle_controller = control.PIDTrackAngleControl(self, track_angle_pid_params, self.sample_time,
                                                                        steering_limits)
 
-            self.path_planner = planning.PathPlanner(epsilon=0.25, sample_time=0.01, number_samples=500, min_distance=6)
+            self.path_planner = planning.PathPlanner(epsilon=0.25, sample_time=0.01, number_samples=500, min_distance=10)
             self.path_planner.update_reference_profile_from_recorded_waypoints(self.waypoints_x, self.waypoints_y, self.waypoints_v)
 
-            self.pure_pursuit = guidance.Guidance(max_straight_track_speed=20.0, max_curving_speed=8.0,
+            self.pure_pursuit = guidance.Guidance(max_straight_track_speed=25.0, max_curving_speed=8.0,
                                                   max_turning_rate=5.0, braking_distance=10.0)
 
             self.show_profile = show_profile
