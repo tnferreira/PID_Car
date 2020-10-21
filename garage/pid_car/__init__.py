@@ -36,7 +36,7 @@ class Car:
             speed_pid_params = [0.605, 0.047, 0.08]
             #speed_pid_params = [0.2, 0.03, 0.08]
             
-            track_angle_pid_params = [0.99, 0.02, 0.1]
+            track_angle_pid_params = [0.99, 0.02, 0.08]
             #track_angle_pid_params = [0.99, 0.00, 0.1]
 
 
