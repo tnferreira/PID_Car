@@ -59,7 +59,7 @@ class Car:
             self.path_planner = planning.PathPlanner(epsilon=0.25, sample_time=0.01, number_samples=500, min_distance=10)
             self.path_planner.update_reference_profile_from_recorded_waypoints(self.waypoints_x, self.waypoints_y, self.waypoints_v)
 
-            self.pure_pursuit = guidance.Guidance(max_straight_track_speed=25.0, max_curving_speed=8.35,
+            self.pure_pursuit = guidance.Guidance(max_straight_track_speed=25.0, max_curving_speed=8.37,
                                                   max_turning_rate=5.0, braking_distance=10.0)
 
             self.show_profile = show_profile
