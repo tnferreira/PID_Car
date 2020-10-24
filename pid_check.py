@@ -12,7 +12,7 @@ client.enableApiControl(True)
 car_controls = airsim.CarControls()
 
 # Define the sample time to perform all processing
-sample_time = 0.01  # [s]
+sample_time = 0.1  # [s]
 
 # Define the speed step parameters
 speed_step_duration = 5  # [s]
