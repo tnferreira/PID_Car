@@ -7,8 +7,7 @@ from skoods import race
 from garage import pid_car
 
 # Connect to Skoods simulation
-sample_time = 0.01  # Define the sample time to perform all processing.
-#sample_time = 0.01  # Define the sample time to perform all processing.
+sample_time = 0.1  # Define the sample time to perform all processing.
 race = race.Race(sample_time)
 race.client.reset()
 speedy = True
