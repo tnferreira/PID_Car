@@ -261,7 +261,7 @@ class PathPlanner:
 
         return next_waypoint_x, next_waypoint_y, next_waypoint_v, curr_segment_d, curr_segment_a, completed_lap
 
-    def show_reference_profile(self):
+    def show_reference_profile(self, show_full_circuit=False):
         """
         Plot the reference profile along the recorded points; indicates the next waypoint and the vehicle trajectory.
         :return: None
@@ -301,11 +301,14 @@ class PathPlanner:
         last_vehicle_track_angle = self.vehicle_track_angle[-1]
 
         # Plot recorded position profile
-        #  self.axs.set_xlim(self.recorded_waypoints_x.min(), self.recorded_waypoints_x.max())
-        #  self.axs.set_ylim(self.recorded_waypoints_y.min(), self.recorded_waypoints_y.max())
-        dist = 100
-        self.axs.set_xlim(last_vehicle_position_x-dist, last_vehicle_position_x+dist)
-        self.axs.set_ylim(last_vehicle_position_y-dist, last_vehicle_position_y+dist)
+        if show_full_circuit:
+            self.axs.set_xlim(self.recorded_waypoints_x.min(), self.recorded_waypoints_x.max())
+            self.axs.set_ylim(self.recorded_waypoints_y.min(), self.recorded_waypoints_y.max())
+        else:
+            dist = 100
+            self.axs.set_xlim(last_vehicle_position_x-dist, last_vehicle_position_x+dist)
+            self.axs.set_ylim(last_vehicle_position_y-dist, last_vehicle_position_y+dist)
+
         self.axs.set_xlabel('x [m]')
         self.axs.set_ylabel('y [m]')
         self.axs.plot(self.reference_profile_waypoints_x, self.reference_profile_waypoints_y, 'k--', marker='o', markersize=4)
@@ -324,5 +327,8 @@ class PathPlanner:
         # axs[1].set_xlabel('t [s]')
         # axs[1].set_ylabel('v [m/s]')
 
-        plt.pause(0.005)
-        #plt.show()
+        if show_full_circuit:
+            plt.show()
+        else:
+            plt.pause(0.001)
+
