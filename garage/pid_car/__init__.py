@@ -9,7 +9,20 @@ from airsim import utils
 from plot import Plot
 
 class Car:
-    def __init__(self, client, sample_time, car_name, mode_input, waypoints_correction=[0, 0], filename = 'something.pickle', show_profile=False, show_pid=False):
+    def __init__(self, client, sample_time, car_name, mode_input, waypoints_correction=[0, 0],
+                 filename='something.pickle', compute_sample_time=False, show_profile=False, show_pid=False):
+        """
+        Default constructor.
+        :param client: AirSim client
+        :param sample_time: default sample time in seconds
+        :param car_name: name of the car
+        :param mode_input: race mode(1 RECORD, 2 QUALIFY, 3 RACE)
+        :param waypoints_correction: X-Y waypoints correction
+        :param filename: name of the file containing the recorded waypoints
+        :param compute_sample_time: a flag to indicate whether the sample time shall be estimated or not
+        :param show_profile: flag to enable the reference profile and vehicle trajectory visualization
+        :param show_pid: flag to enable the PID controller input / output visualization
+        """
         self.client = client
         self.sample_time = sample_time
         self.name = car_name
@@ -18,6 +31,9 @@ class Car:
         self.waypoints = planning.Waypoints(self.name) # Initialize waypoints object
         self.filename = filename
         self.min_speed = 2.0  # meters per second
+        self.compute_sample_time = compute_sample_time
+        self.last_timestamp = []
+        self.estimated_sample_time = []
 
         if self.mode_input == '2' or self.mode_input == '3': # If Qualify or Race
             self.client.enableApiControl(True, self.name)
@@ -56,12 +72,19 @@ class Car:
             self.track_angle_controller = control.PIDTrackAngleControl(self, track_angle_pid_params, self.sample_time,
                                                                        steering_limits)
 
-            self.path_planner = planning.PathPlanner(epsilon=0.25, sample_time=self.sample_time, number_samples=500, min_distance=10)
-            self.path_planner.update_reference_profile_from_recorded_waypoints(self.waypoints_x, self.waypoints_y, self.waypoints_v)
+            self.path_planner = planning.PathPlanner(epsilon=0.25,
+                                                     sample_time=self.sample_time,
+                                                     number_samples=500,
+                                                     min_distance=10)
+            self.path_planner.update_reference_profile_from_recorded_waypoints(self.waypoints_x,
+                                                                               self.waypoints_y,
+                                                                               self.waypoints_v)
 
             # 9.5
-            self.pure_pursuit = guidance.Guidance(max_straight_track_speed=25.0, max_curving_speed=10.0,
-                                                  max_turning_rate=5.0, braking_distance=10.0)
+            self.pure_pursuit = guidance.Guidance(max_straight_track_speed=25.0,
+                                                  max_curving_speed=10.0,
+                                                  max_turning_rate=5.0,
+                                                  braking_distance=10.0)
 
             self.show_profile = show_profile
             self.show_pid = show_pid
@@ -79,6 +102,14 @@ class Car:
         self.state = localization.updateState(self)
         self.state.kinematics_estimated.position.x_val += self.waypoints_correction[0]
         self.state.kinematics_estimated.position.y_val += self.waypoints_correction[1]
+
+    def estimateSampleTime(self):
+        current_timestamp = self.getCurrentTimestamp()
+        if self.compute_sample_time and not self.last_timestamp:
+            self.estimated_sample_time = current_timestamp - self.last_timestamp  # compute it using the last timestamp
+        else:
+            self.estimated_sample_time = self.sample_time  # use the default sample time
+        self.last_timestamp = current_timestamp
 
     def updateCarBehavior(self):
         self.behavior.setCarBehavior()
@@ -128,13 +159,14 @@ class Car:
     def drive(self, speed, track_angle):
         self.updateState()  # update position and other data
         self.updateCarBehavior()  # define the behavior of the car based on conditions
+        self.estimateSampleTime()  # update the sample time estimate
         self.behavior.mode = 'CRUZE'
 
         # Run Speed PID
-        self = self.speed_controller.getControlsFromPID(self, speed)
+        self = self.speed_controller.getControlsFromPID(self, speed, self.estimated_sample_time)
 
         # Run Track Angle PID
-        self = self.track_angle_controller.getControlsFromPID(self, track_angle)
+        self = self.track_angle_controller.getControlsFromPID(self, track_angle, self.estimated_sample_time)
 
         # Send controls to simulation
         self.setControls()
@@ -142,13 +174,11 @@ class Car:
     def speedy_race(self):
         """
         Run the car faster using alternative PID controllers.
-
-        :param show_profile: flag to enable the reference profile and vehicle trajectory visualization
-        :param show_pid: flag to enable the PID controller input / output visualization
-        :return:
+        :return: A flag to still racing.
         """
         self.updateState()  # update position and other data
         self.updateCarBehavior()  # define the behavior of the car based on conditions
+        self.estimateSampleTime()  # update the sample time estimate
         #self.behavior.mode = 'CRUZE'
 
         # Get vehicle state
@@ -181,10 +211,10 @@ class Car:
         #  print("speed sp: " + str(speed_set_point) + " angle: "+  str(np.rad2deg(track_angle_set_point)) + " [deg]")
 
         # Run Speed PID
-        self = self.speed_controller.getControlsFromPID(self, speed_set_point)
+        self = self.speed_controller.getControlsFromPID(self, speed_set_point, self.estimated_sample_time)
 
         # Run Track Angle PID
-        self = self.track_angle_controller.getControlsFromPID(self, track_angle_set_point)
+        self = self.track_angle_controller.getControlsFromPID(self, track_angle_set_point, self.estimated_sample_time)
 
         # Send controls to simulation
         self.setControls()
@@ -226,4 +256,12 @@ class Car:
 
         (pitch, roll, yaw) = utils.to_eularian_angles(self.state.kinematics_estimated.orientation)
         return yaw
+
+    def getCurrentTimestamp(self):
+        """
+        Get the current state time stamp in seconds since UNIX epoch with nanoseconds precision.
+
+        :return: The current state time stamp.
+        """
+        return np.double(self.state.timestamp) / 1e9
 

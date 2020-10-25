@@ -18,8 +18,9 @@ speedy = True
 # OPTION A: Qualify and record waypoints
 # Need to change the settings.json file. Check the JSON_examples folder
 '''
-pid_car1 = pid_car.Car(race.client, race.sample_time, 'SetCarName1', race.mode_input, filename='run-fast4-new.pickle', show_profile=False, show_pid=True) # Give the car the name you want
-cars = [pid_car1]
+art_car = pid_car.Car(race.client, race.sample_time, 'ART Car', race.mode_input, filename='run-fast4-new.pickle',
+                      compute_sample_time=True, show_profile=False, show_pid=True)  # Give the car the name you want
+cars = [art_car]
 
 '''
 # OPTION B: Race 3 cars
@@ -43,7 +44,7 @@ elif race.mode_input == '2' or race.mode_input == '3':
     race.setInitialTime()
     keep_racing = True
 
-    while(keep_racing):
+    while keep_racing:
         for each_car in cars:
             ### RUN YOUR CODE HERE
             if speedy:
@@ -56,6 +57,6 @@ elif race.mode_input == '2' or race.mode_input == '3':
         keep_racing_from_race = race.updateRaceParameters()
         keep_racing = (keep_racing_from_car and keep_racing_from_race) # you can add more interruptions if needed
 
-#pid_car1.resetControls()
-#race.client.enableApiControl(False, 'SetCarName1')
-#race.client.reset()
+# art_car.resetControls()
+# race.client.enableApiControl(False, 'ART Car')
+# race.client.reset()

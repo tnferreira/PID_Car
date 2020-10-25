@@ -57,6 +57,10 @@ class PIDControl:
             self.pid_controller.output = output
         return output
 
+    def setSampleTime(self, new_sample_time):
+        self.sample_time = new_sample_time
+        self.pid_controller.setSampleTime(new_sample_time)
+
 
 class PIDThrottleControl(PIDControl):
     def __init__(self, car_state, pid_params, sample_time, limits):
@@ -142,10 +146,28 @@ class PIDSpeedControl(PIDControl):
     This class allows one to control the magnitude of the velocity vector, i.e. car's speed. In particular, it employs
      a PID controller to generate a throttle control signal such that the car's speed will seek a reference value.
     """
-    def __init__(self, car_state, pid_params, sample_time, limits):
-        PIDControl.__init__(self, car_state, pid_params, sample_time, limits)
+    def __init__(self, car, pid_params, sample_time, limits):
+        """
+        Default constructor.
+        :param car: the car object
+        :param pid_params: PID parameters
+        :param sample_time: default sample time in seconds
+        :param limits: PID control signals bounds
+        """
+        PIDControl.__init__(self, car, pid_params, sample_time, limits)
 
-    def getControlsFromPID(self, car, target_speed):
+    def getControlsFromPID(self, car, target_speed, sample_time=[]):
+        """
+        Compute PID control signals.
+        :param car: the car object
+        :param target_speed: the speed reference in meters per second
+        :param sample_time: the estimated sample time in seconds (optional)
+        :return: The update car object with new PID control signals.
+        """
+
+        # Set the sample time
+        if not sample_time:
+            self.setSampleTime(sample_time)
 
         # Get current speed
         current_speed = car.getCurrentSpeed()
@@ -174,20 +196,38 @@ class PIDTrackAngleControl(PIDControl):
      a PID controller to generate a steering control signal such that the car's track angle will seek a reference value.
     """
     def __init__(self, car, pid_params, sample_time, limits):
+        """
+        Default constructor.
+        :param car: the car object
+        :param pid_params: PID parameters
+        :param sample_time: default sample time in seconds
+        :param limits: PID control signals bounds
+        """
         PIDControl.__init__(self, car, pid_params, sample_time, limits)
 
-    def getControlsFromPID(self, car, target_track_angle):
+    def getControlsFromPID(self, car, target_track_angle, sample_time=[]):
+        """
+        Compute PID control signals.
+        :param car: the car object
+        :param target_track_angle: the track angle reference in radians
+        :param sample_time: the estimated sample time in seconds (optional)
+        :return: The update car object with new PID control signals.
+        """
+
+        # Set the sample time
+        if not sample_time:
+            self.setSampleTime(sample_time)
 
         # Get current track angle
         current_track_angle = car.getCurrentTrackAngle()
 
         # Compute the track angle error properly
         track_angle_error = target_track_angle - current_track_angle
-        while (track_angle_error > math.pi):
+        while track_angle_error > math.pi:
             track_angle_error -= 2*math.pi
-        while (track_angle_error < -math.pi):
+        while track_angle_error < -math.pi:
             track_angle_error += 2*math.pi
-        #track_angle_error = np.unwrap([target_track_angle - current_track_angle])[0]
+        # track_angle_error = np.unwrap([target_track_angle - current_track_angle])[0]
         # print("target_track_angle: " + str(np.rad2deg(target_track_angle)) + " [deg]")
         # print("current_track_angle: " + str(np.rad2deg(current_track_angle)) + " [deg]")
         # print("track_angle_error: " + str(np.rad2deg(track_angle)) + " [deg]")
