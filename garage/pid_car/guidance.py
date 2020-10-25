@@ -96,6 +96,10 @@ class Guidance:
 
         # Track angle set point smoother
         if self.last_track_angle_set_point_init:
+            while self.last_track_angle_set_point - track_angle_set_point > math.pi:
+                self.last_track_angle_set_point -= 2*math.pi
+            while self.last_track_angle_set_point - track_angle_set_point < -math.pi:
+                self.last_track_angle_set_point += 2*math.pi
             track_angle_set_point = self.track_angle_set_point_update_rate * track_angle_set_point +\
                                     (1 - self.track_angle_set_point_update_rate) * self.last_track_angle_set_point
         self.last_track_angle_set_point = track_angle_set_point
