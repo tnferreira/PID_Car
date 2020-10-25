@@ -33,10 +33,10 @@ class Car:
             throttle_pid_params = [0.2, 0.03, 0.08]
             steering_pid_params = [0.1, 0.00, 0.18]
 
-            speed_pid_params = [0.50, 0.047, 0.08]
+            speed_pid_params = [0.5, 0.047, 0.08]
             #speed_pid_params = [0.2, 0.03, 0.08]
             
-            track_angle_pid_params = [0.99, 0.02, 0.08]
+            track_angle_pid_params = [2, 0.02, 0.08]
             #track_angle_pid_params = [0.99, 0.00, 0.1]
 
 
@@ -56,7 +56,7 @@ class Car:
             self.track_angle_controller = control.PIDTrackAngleControl(self, track_angle_pid_params, self.sample_time,
                                                                        steering_limits)
 
-            self.path_planner = planning.PathPlanner(epsilon=0.25, sample_time=0.01, number_samples=500, min_distance=10)
+            self.path_planner = planning.PathPlanner(epsilon=0.25, sample_time=self.sample_time, number_samples=500, min_distance=10)
             self.path_planner.update_reference_profile_from_recorded_waypoints(self.waypoints_x, self.waypoints_y, self.waypoints_v)
 
             self.pure_pursuit = guidance.Guidance(max_straight_track_speed=25.0, max_curving_speed=8.37,
@@ -216,10 +216,13 @@ class Car:
 
         :return: The track angle if the speed is greater than a threshold; the vehicle yaw, otherwise.
         """
-        if self.state.speed > self.min_speed:
-            return np.arctan2(self.state.kinematics_estimated.linear_velocity.y_val,
-                              self.state.kinematics_estimated.linear_velocity.x_val)
-        else:
-            (pitch, roll, yaw) = utils.to_eularian_angles(self.state.kinematics_estimated.orientation)
-            return yaw
+#        if self.state.speed > self.min_speed:
+#            return np.arctan2(self.state.kinematics_estimated.linear_velocity.y_val,
+#                              self.state.kinematics_estimated.linear_velocity.x_val)
+#        else:
+#            (pitch, roll, yaw) = utils.to_eularian_angles(self.state.kinematics_estimated.orientation)
+#            return yaw
+
+        (pitch, roll, yaw) = utils.to_eularian_angles(self.state.kinematics_estimated.orientation)
+        return yaw
 
