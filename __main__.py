@@ -18,8 +18,8 @@ speedy = True
 # OPTION A: Qualify and record waypoints
 # Need to change the settings.json file. Check the JSON_examples folder
 '''
-art_car = pid_car.Car(race.client, race.sample_time, 'ART Car', race.mode_input, filename='run-fast4-new.pickle',
-                      compute_sample_time=True, show_profile=False, show_pid=True)  # Give the car the name you want
+art_car = pid_car.Car(race.client, race.sample_time, 'ART Car', race.mode_input, filename='run-fast4-old.pickle',
+                      compute_sample_time=False, show_profile=False, show_pid=True)  # Give the car the name you want
 cars = [art_car]
 
 '''

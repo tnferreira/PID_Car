@@ -23,14 +23,14 @@ class Guidance:
         self.braking_distance = braking_distance
         self.last_speed_set_point = 0.0
         self.last_speed_set_point_init = False
-        self.speed_set_point_update_rate = 0.1
+        self.speed_set_point_update_rate = 0.05
         self.last_track_angle_set_point = 0.0
         self.last_track_angle_set_point_init = False
         #self.track_angle_set_point_update_rate = 0.95
         self.track_angle_set_point_update_rate = 0.1
 
         self.min_segment_length = 10.0
-        self.max_segment_length = 140.0
+        self.max_segment_length = 90.0
 
 
     def update_control_targets(self, current_vehicle_position_x, current_vehicle_position_y, current_vehicle_speed,

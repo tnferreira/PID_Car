@@ -25,7 +25,7 @@ track_angle_step_amplitude = np.deg2rad(2.5)  # [rad]
 track_angle_step_samples = math.floor(track_angle_step_duration / sample_time)
 
 # Create the PID car
-pid_car1 = pid_car.Car(client, sample_time, 'SetCarName1', '2', filename='run-fast4.pickle') 
+pid_car1 = pid_car.Car(client, sample_time, 'ART Car', '2', filename='run-fast4-new.pickle') 
 
 # Create the plotter
 p = Plot(blit=True, sample_interval=sample_time)
