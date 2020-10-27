@@ -285,6 +285,30 @@ class PathPlanner:
         curr_segment_d = self.reference_profile_waypoints_d[nearest_waypoint_index]
         curr_segment_a = self.reference_profile_waypoints_a[nearest_waypoint_index]
 
+        ############ NEW PLANNING
+        # Get next waypoint position and speed
+        next2_waypoint_x = self.reference_profile_waypoints_x[nearest_waypoint_index+1]
+        next2_waypoint_y = self.reference_profile_waypoints_y[nearest_waypoint_index+1]
+        next2_waypoint_v = self.reference_profile_waypoints_v[nearest_waypoint_index+1]
+
+        next2_segment_d = self.reference_profile_waypoints_d[nearest_waypoint_index+1]
+        next2_segment_a = self.reference_profile_waypoints_a[nearest_waypoint_index+1]
+
+        # Distance and angle to the next waypoint
+        while (next2_segment_a > math.pi):
+            next2_segment_a -= 2*math.pi
+        while (next2_segment_a < -math.pi):
+            next2_segment_a += 2*math.pi
+        
+        # Check the angle between two segments and merge then if the difference is mininum
+        angle_in_deg = np.rad2deg(next2_segment_a)
+        if(abs(angle_in_deg) <= 1.0):
+             next_waypoint_x = next2_waypoint_x
+             next_waypoint_y = next2_waypoint_y
+             curr_segment_d = curr_segment_d + next2_segment_d #sum two consecutive segments
+             curr_segment_a = next2_segment_a
+        ############ NEW PLANNING
+
         return next_waypoint_x, next_waypoint_y, next_waypoint_v, curr_segment_d, curr_segment_a, completed_lap
 
     def show_reference_profile(self, show_full_circuit=False):
