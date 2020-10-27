@@ -100,7 +100,7 @@ class Waypoints:
         # FUTURE: waypoints_x, waypoints_y, waypoints_yaw, waypoints_v = [], [], [], []
         for each_waypoint in self.waypoints_list:
             waypoints_x.append(each_waypoint.kinematics_estimated.position.x_val) # Must apply correction when racing with more then one car because of initial position change for the grid.
-            waypoints_y.append(each_waypoint.kinematics_estimated.position.y_val)
+            waypoints_y.append(each_waypoint.kinematics_estimated.position.y_val*-1) # inverted y coord
             # FUTURE: _, _, yaw_val = airsim.utils.to_eularian_angles(each_waypoint.kinematics_estimated.orientation) # NED coord
             # FUTURE: waypoints_yaw.append(yaw_val)
             waypoints_v.append(each_waypoint.speed) # m/s
