@@ -14,11 +14,37 @@ from matplotlib.collections import LineCollection
 class Waypoints:
     def __init__(self, car_name):
         self.waypoints_list = []
+        self.last_race_wps = []
         self.current_time = time.time()
         self.last_time = self.current_time
         self.past_x_val = 0.0
         self.past_y_val = 0.0
         self.car_name = car_name
+
+    def recordRaceWaypoint(self, car, sample_time):
+        # Get and append waypoint after reaching sample time
+        self.current_time = time.time()
+        delta_time = self.current_time - self.last_time
+        car_state = car.client.getCarState(car.name)
+        x_val = car_state.kinematics_estimated.position.x_val
+        y_val = car_state.kinematics_estimated.position.y_val
+        # Record waypoints only 10cm of distance from past waypoint, otherwise can return same waypoint. You can change if you want to.
+        if utils.distance_of_two_points(x_val, y_val, self.past_x_val, self.past_y_val) > 0.1:
+            distance_bool = True
+        else:
+            distance_bool = False
+        # also take in consideration sample time
+        if ((delta_time >= sample_time) and distance_bool == True):
+            self.last_race_wps.append(car_state)
+            self.last_time = self.current_time
+        self.past_x_val = x_val
+        self.past_y_val = y_val
+
+    def saveRecordedRaceToFile(self, filename):
+        print (self.car_name + " || LAST RACE: Saving waypoints to pickle file.")
+        with open(os.path.join(filename),"wb") as f:
+            pickle.dump(self.last_race_wps, f)
+        print(self.car_name + " || LAST RACE: Success! %d waypoints saved to disk." % (len(self.last_race_wps)))
 
     def getCurrentWaypoint(self, car, sample_time):
         # Get and append waypoint after reaching sample time
@@ -314,11 +340,26 @@ class PathPlanner:
         self.axs.plot(self.reference_profile_waypoints_x, self.reference_profile_waypoints_y, 'k--', marker='o', markersize=4)
         self.axs.plot([last_vehicle_position_x, last_waypoint_x], [last_vehicle_position_y, last_waypoint_y], 'g-', marker='o')
         self.axs.plot(self.vehicle_position_x, self.vehicle_position_y, 'b--')
-        # idx = 0
-        # sp = 0.05
+        sp = 0.05
+
+        # Adds point index to the graphic
+        #idx = 0
         # for i,j in zip(self.reference_profile_waypoints_x, self.reference_profile_waypoints_y):
-        #     axs.annotate(str(idx), xy=(i+sp,j+sp))
+        #     self.axs.annotate(str(idx), xy=(i+sp,j+sp))
         #     idx += 1
+
+        # Add segment length at initial point
+        wp_idx = 0
+        next_wp_idx = 0
+        for i,j in zip(self.reference_profile_waypoints_x, self.reference_profile_waypoints_y):
+            next_wp_idx = wp_idx+1
+            if next_wp_idx > (len(self.reference_profile_waypoints_x)-1): 
+                next_wp_idx = 0
+
+            d = utils.distance_of_two_points(self.reference_profile_waypoints_x[wp_idx], self.reference_profile_waypoints_y[wp_idx],
+                 self.reference_profile_waypoints_x[next_wp_idx], self.reference_profile_waypoints_y[next_wp_idx])
+            self.axs.annotate(round(d, 1), xy=(i+sp,j+sp))
+            wp_idx += 1
 
         # Plot recorded speed profile
         # axs[1].plot(self.recorded_waypoints_t, self.recorded_waypoints_v)

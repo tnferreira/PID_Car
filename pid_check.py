@@ -71,9 +71,11 @@ for x in range(speed_step_samples):
     client.simPause(True)
     p.update(pid_car1)
 
-pid_car1.resetControls()
 
+pid_car1.saveRaceToFile('last-race.pickle')
+pid_car1.resetControls()
 # Restore to original car state
 time.sleep(60)
 client.reset()
 client.enableApiControl(False)
+

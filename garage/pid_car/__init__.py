@@ -120,6 +120,9 @@ class Car:
     def recordWaypointsToFile(self, sample_time = 0.005):
         self.waypoints.recordWaypointsToFile(self, sample_time, filename = self.filename)
 
+    def saveRaceToFile(self, filename = "lastrace.pickle"):
+        self.waypoints.saveRecordedRaceToFile(filename)
+
     def updateTrajectory(self):
         self.waypoints_x, self.waypoints_y, self.waypoints_v = self.waypoints.waypointsToLists(self.waypoints_correction)
 
@@ -167,6 +170,8 @@ class Car:
 
         # Run Track Angle PID
         self = self.track_angle_controller.getControlsFromPID(self, track_angle, self.estimated_sample_time)
+
+        self.waypoints.recordRaceWaypoint(self, self.sample_time)
 
         # Send controls to simulation
         self.setControls()
@@ -218,6 +223,8 @@ class Car:
 
         # Send controls to simulation
         self.setControls()
+
+        self.waypoints.recordRaceWaypoint(self, self.sample_time)
 
         # Show PIDs
         if self.show_pid:
