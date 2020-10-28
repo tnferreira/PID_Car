@@ -49,10 +49,10 @@ class Car:
             throttle_pid_params = [0.2, 0.03, 0.08]
             steering_pid_params = [0.1, 0.00, 0.18]
 
-            speed_pid_params = [1, 0.047, 0.1]
-            #speed_pid_params = [0.2, 0.03, 0.08]
-            
-            track_angle_pid_params = [2.5, 0.02, 0.1]
+            speed_pid_params = [1.5, 0.047, 0.1]
+            #speed_pid_params = [1, 0.047, 0.1]
+                        
+            track_angle_pid_params = [2.3, 0.02, 0.1]
             #track_angle_pid_params = [0.99, 0.00, 0.1]
 
 
@@ -81,7 +81,7 @@ class Car:
                                                                                self.waypoints_v)
 
             # 9.5
-            self.pure_pursuit = guidance.Guidance(max_straight_track_speed=29.0,
+            self.pure_pursuit = guidance.Guidance(max_straight_track_speed=30.5,
                                                   max_curving_speed=12.0,
                                                   max_turning_rate=5.0,
                                                   braking_distance=10.0)
@@ -119,6 +119,9 @@ class Car:
 
     def recordWaypointsToFile(self, sample_time = 0.005):
         self.waypoints.recordWaypointsToFile(self, sample_time, filename = self.filename)
+
+    def saveRaceToFile(self, filename = "lastrace.pickle"):
+        self.waypoints.saveRecordedRaceToFile(filename)
 
     def updateTrajectory(self):
         self.waypoints_x, self.waypoints_y, self.waypoints_v = self.waypoints.waypointsToLists(self.waypoints_correction)
@@ -167,6 +170,8 @@ class Car:
 
         # Run Track Angle PID
         self = self.track_angle_controller.getControlsFromPID(self, track_angle, self.estimated_sample_time)
+
+        self.waypoints.recordRaceWaypoint(self, self.sample_time)
 
         # Send controls to simulation
         self.setControls()
@@ -218,6 +223,8 @@ class Car:
 
         # Send controls to simulation
         self.setControls()
+
+        self.waypoints.recordRaceWaypoint(self, self.sample_time)
 
         # Show PIDs
         if self.show_pid:
