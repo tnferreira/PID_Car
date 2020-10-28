@@ -30,6 +30,8 @@ class Car:
         self.waypoints_correction = waypoints_correction
         self.waypoints = planning.Waypoints(self.name) # Initialize waypoints object
         self.filename = filename
+        self.race_time = 0.0
+        self.race_time_delta = sample_time
         self.min_speed = 2.0  # meters per second
         self.compute_sample_time = compute_sample_time
         self.last_timestamp = []
@@ -127,6 +129,12 @@ class Car:
         self.waypoints_x, self.waypoints_y, self.waypoints_v = self.waypoints.waypointsToLists(self.waypoints_correction)
 
     def updateControls(self):
+        # Define sample time dynamicaly
+#        self.throttle_controller.pid_controller.setSampleTime(self.race_time_delta)
+        #print(self.throttle_controller.pid_controller.sample_time)
+#        self.steering_controller.pid_controller.setSampleTime(self.race_time_delta)
+        #print(self.steering_controller.pid_controller.sample_time)
+
         # Run Throttle PID
         keep_racing_throttle = self.throttle_controller.setTargetValue(self, self.waypoints_x, self.waypoints_y, self.waypoints_v) # Set goal each interaction, as speed target will change
         self = self.throttle_controller.getControlsFromPID(self) # Return controls after running PID (this method is different for each PID type)
@@ -153,10 +161,14 @@ class Car:
             # self.controls.steering = 0.0
             self.client.setCarControls(self.controls, self.name)
 
-    def race(self):
+
+    def race(self, race_time):
+        self.race_time_delta = race_time - self.race_time
+        self.race_time = race_time
         self.updateState() # update position and other data
         self.updateCarBehavior() # define the behavior of the car based on conditions
         keep_racing = self.updateControls() # return false if waypoints reach final index
+        print(self.race_time)
         return keep_racing
 
     def drive(self, speed, track_angle):

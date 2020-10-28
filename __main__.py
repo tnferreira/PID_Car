@@ -48,9 +48,9 @@ elif race.mode_input == '2' or race.mode_input == '3':
         for each_car in cars:
             ### RUN YOUR CODE HERE
             if speedy:
-                keep_racing_from_car = each_car.speedy_race()
+                keep_racing_from_car = each_car.speedy_race(race.accum_time)
             else:
-                keep_racing_from_car = each_car.race()  # keep_racing_from_car not being used, but I will leave here just in case
+                keep_racing_from_car = each_car.race(race.accum_time)  # keep_racing_from_car not being used, but I will leave here just in case
 
             ### END HERE
         race.playSimulation() # Will check for mode
