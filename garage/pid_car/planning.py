@@ -214,6 +214,62 @@ class PathPlanner:
         self.reference_profile_waypoints_d[0] = 100.0
         self.reference_profile_waypoints_a[0] = -math.pi
 
+        ############ NEW PLANNING FILTER
+        enable_filter = False
+        angle_diff_discard = 2.0
+        if (enable_filter):
+            n = self.reference_profile_waypoints_a.size
+            mask2 = np.array([], dtype=bool)
+            idx = 0
+            print("Apply angle filter on :" + str(n))
+            time.sleep(2)
+            while(idx < n):
+                next_idx = idx+1
+                if next_idx >= len(self.reference_profile_waypoints_a):
+                    next_idx = 0
+                curr_segment_a = self.reference_profile_waypoints_a[idx]
+                next2_segment_a = self.reference_profile_waypoints_a[next_idx]
+
+                da = curr_segment_a - next2_segment_a
+                # Distance and angle to the next waypoint
+                while (da > math.pi):
+                    da -= 2*math.pi
+                while (da < -math.pi):
+                    da += 2*math.pi
+
+                # Check the angle between two segments and remove point if the angle is minimum
+                angle_in_deg = np.rad2deg(da)
+                #print( str(idx) + " to next segment diff: " + str(angle_in_deg))
+                if (abs(angle_in_deg) <= angle_diff_discard):
+                    mask2 = np.append(mask2, False)
+                    #print("Pop waypoint index: " + str(idx))
+                else:
+                    mask2 = np.append(mask2, True)
+                idx+=1
+
+            # Set the reference profile
+            self.reference_profile_waypoints_x = self.reference_profile_waypoints_x[mask2]
+            self.reference_profile_waypoints_y = self.reference_profile_waypoints_y[mask2]
+            self.reference_profile_waypoints_v = self.reference_profile_waypoints_v[mask2]
+            self.reference_profile_waypoints_a = self.reference_profile_waypoints_a[mask2]
+            self.reference_profile_waypoints_d = self.reference_profile_waypoints_d[mask2]
+            #print (self.reference_profile_waypoints_v)
+            length = len(self.reference_profile_waypoints_a)
+            print("New set waypoints:" + str(length) + " - Filtered: " + str(n - length))
+
+             # Compute AGAIN displacements between consecutive waypoints
+            reference_profile_waypoints_dx = self.reference_profile_waypoints_x - \
+                                            np.roll(self.reference_profile_waypoints_x, 1)
+            reference_profile_waypoints_dy = self.reference_profile_waypoints_y - \
+                                            np.roll(self.reference_profile_waypoints_y, 1)
+
+            # Compute AGAIN line segments lengths and orientations
+            self.reference_profile_waypoints_d = np.hypot(reference_profile_waypoints_dx, reference_profile_waypoints_dy)
+            self.reference_profile_waypoints_a = np.arctan2(reference_profile_waypoints_dy, reference_profile_waypoints_dx)
+            self.reference_profile_waypoints_d[0] = 100.0
+            self.reference_profile_waypoints_a[0] = -math.pi
+        # END NEW PLANNING FILTER
+
         # Reset auxiliary indexes
         self.initial_search_index = 0
         self.last_waypoint_index = 0
@@ -284,29 +340,6 @@ class PathPlanner:
 
         curr_segment_d = self.reference_profile_waypoints_d[nearest_waypoint_index]
         curr_segment_a = self.reference_profile_waypoints_a[nearest_waypoint_index]
-
-        ############ NEW PLANNING
-        # Get next waypoint position and speed
-        next2_waypoint_x = self.reference_profile_waypoints_x[nearest_waypoint_index+1]
-        next2_waypoint_y = self.reference_profile_waypoints_y[nearest_waypoint_index+1]
-        next2_waypoint_v = self.reference_profile_waypoints_v[nearest_waypoint_index+1]
-
-        next2_segment_d = self.reference_profile_waypoints_d[nearest_waypoint_index+1]
-        next2_segment_a = self.reference_profile_waypoints_a[nearest_waypoint_index+1]
-
-        da = curr_segment_a - next2_segment_a
-        # Distance and angle to the next waypoint
-        while (da > math.pi):
-            da -= 2*math.pi
-        while (da < -math.pi):
-            da += 2*math.pi
-        
-        # Check the angle between two segments and merge then if the difference is mininum
-        angle_in_deg = np.rad2deg(da)
-        print("next segment diff: " + str(angle_in_deg))
-        if(abs(angle_in_deg) <= 2.0 ):
-             curr_segment_d = curr_segment_d + next2_segment_d #sum two consecutive segments
-        ############ NEW PLANNING
 
         return next_waypoint_x, next_waypoint_y, next_waypoint_v, curr_segment_d, curr_segment_a, completed_lap
 
