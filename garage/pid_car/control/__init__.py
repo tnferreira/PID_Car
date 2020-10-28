@@ -156,18 +156,14 @@ class PIDSpeedControl(PIDControl):
         """
         PIDControl.__init__(self, car, pid_params, sample_time, limits)
 
-    def getControlsFromPID(self, car, target_speed, sample_time=[]):
+    def getControlsFromPID(self, car, target_speed, delta_time=[]):
         """
         Compute PID control signals.
         :param car: the car object
         :param target_speed: the speed reference in meters per second
-        :param sample_time: the estimated sample time in seconds (optional)
+        :param delta_time: the estimated delta time in seconds (optional)
         :return: The update car object with new PID control signals.
         """
-
-        # Set the sample time
-        if not sample_time:
-            self.setSampleTime(sample_time)
 
         # Get current speed
         current_speed = car.getCurrentSpeed()
@@ -176,7 +172,7 @@ class PIDSpeedControl(PIDControl):
 
         # Return the value of the controls after updating the PID
         self.pid_controller.SetPoint = target_speed
-        self.pid_controller.update(current_speed)
+        self.pid_controller.update(current_speed, delta_time)
         output = self.pid_controller.output
         output = self.limitOutput(output)
 
@@ -205,18 +201,14 @@ class PIDTrackAngleControl(PIDControl):
         """
         PIDControl.__init__(self, car, pid_params, sample_time, limits)
 
-    def getControlsFromPID(self, car, target_track_angle, sample_time=[]):
+    def getControlsFromPID(self, car, target_track_angle, delta_time=[]):
         """
         Compute PID control signals.
         :param car: the car object
         :param target_track_angle: the track angle reference in radians
-        :param sample_time: the estimated sample time in seconds (optional)
+        :param delta_time: the estimated delta time in seconds (optional)
         :return: The update car object with new PID control signals.
         """
-
-        # Set the sample time
-        if not sample_time:
-            self.setSampleTime(sample_time)
 
         # Get current track angle
         current_track_angle = car.getCurrentTrackAngle()
@@ -234,7 +226,7 @@ class PIDTrackAngleControl(PIDControl):
 
         # Update PID and set controls
         self.pid_controller.SetPoint = 0.0  # Actually, the set point is not zero
-        self.pid_controller.update(-track_angle_error)  # The difference between the current and the target track angle
+        self.pid_controller.update(-track_angle_error, delta_time)  # The difference between the current and the target track angle
         # is plugged here
         output = self.pid_controller.output
         output = self.limitOutput(output)

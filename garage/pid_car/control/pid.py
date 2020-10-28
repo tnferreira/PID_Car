@@ -63,14 +63,15 @@ class PID:
 
         self.output = 0.0
         
-    def update(self, feedback_value):
+    def update(self, feedback_value, delta_time=[]):
         """Calculates PID value for given reference feedback
            math: u(t) = K_p e(t) + K_i \int_{0}^{t} e(t)dt + K_d {de}/{dt}
         """
         error = self.SetPoint - feedback_value
-        
+
         self.current_time = time.time()
-        delta_time = self.current_time - self.last_time
+        if delta_time == []:
+            delta_time = self.current_time - self.last_time
         delta_error = error - self.last_error
 
         if (delta_time >= self.sample_time):

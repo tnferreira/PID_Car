@@ -35,7 +35,7 @@ class Car:
         self.min_speed = 2.0  # meters per second
         self.compute_sample_time = compute_sample_time
         self.last_timestamp = []
-        self.estimated_sample_time = []
+        self.estimated_delta_time = []
 
         if self.mode_input == '2' or self.mode_input == '3': # If Qualify or Race
             self.client.enableApiControl(True, self.name)
@@ -105,12 +105,12 @@ class Car:
         self.state.kinematics_estimated.position.x_val += self.waypoints_correction[0]
         self.state.kinematics_estimated.position.y_val += self.waypoints_correction[1]
 
-    def estimateSampleTime(self):
+    def estimateDeltaTime(self):
         current_timestamp = self.getCurrentTimestamp()
         if self.compute_sample_time and not self.last_timestamp:
-            self.estimated_sample_time = current_timestamp - self.last_timestamp  # compute it using the last timestamp
+            self.estimated_delta_time = current_timestamp - self.last_timestamp  # compute it using the last timestamp
         else:
-            self.estimated_sample_time = self.sample_time  # use the default sample time
+            self.estimated_delta_time = self.sample_time  # use the default sample time
         self.last_timestamp = current_timestamp
 
     def updateCarBehavior(self):
@@ -130,9 +130,9 @@ class Car:
 
     def updateControls(self):
         # Define sample time dynamicaly
-#        self.throttle_controller.pid_controller.setSampleTime(self.race_time_delta)
+        self.throttle_controller.pid_controller.setSampleTime(self.race_time_delta)
         #print(self.throttle_controller.pid_controller.sample_time)
-#        self.steering_controller.pid_controller.setSampleTime(self.race_time_delta)
+        self.steering_controller.pid_controller.setSampleTime(self.race_time_delta)
         #print(self.steering_controller.pid_controller.sample_time)
 
         # Run Throttle PID
@@ -174,14 +174,14 @@ class Car:
     def drive(self, speed, track_angle):
         self.updateState()  # update position and other data
         self.updateCarBehavior()  # define the behavior of the car based on conditions
-        self.estimateSampleTime()  # update the sample time estimate
+        self.estimateDeltaTime()  # update the delta time estimate
         self.behavior.mode = 'CRUZE'
 
         # Run Speed PID
-        self = self.speed_controller.getControlsFromPID(self, speed, self.estimated_sample_time)
+        self = self.speed_controller.getControlsFromPID(self, speed, self.estimated_delta_time)
 
         # Run Track Angle PID
-        self = self.track_angle_controller.getControlsFromPID(self, track_angle, self.estimated_sample_time)
+        self = self.track_angle_controller.getControlsFromPID(self, track_angle, self.estimated_delta_time)
 
         self.waypoints.recordRaceWaypoint(self)
 
@@ -195,7 +195,7 @@ class Car:
         """
         self.updateState()  # update position and other data
         self.updateCarBehavior()  # define the behavior of the car based on conditions
-        self.estimateSampleTime()  # update the sample time estimate
+        self.estimateDeltaTime()  # update the sample time estimate
         #self.behavior.mode = 'CRUZE'
 
         # Get vehicle state
@@ -228,10 +228,10 @@ class Car:
         #  print("speed sp: " + str(speed_set_point) + " angle: "+  str(np.rad2deg(track_angle_set_point)) + " [deg]")
 
         # Run Speed PID
-        self = self.speed_controller.getControlsFromPID(self, speed_set_point, self.estimated_sample_time)
+        self = self.speed_controller.getControlsFromPID(self, speed_set_point, self.estimated_delta_time)
 
         # Run Track Angle PID
-        self = self.track_angle_controller.getControlsFromPID(self, track_angle_set_point, self.estimated_sample_time)
+        self = self.track_angle_controller.getControlsFromPID(self, track_angle_set_point, self.estimated_delta_time)
 
         # Send controls to simulation
         self.setControls()
