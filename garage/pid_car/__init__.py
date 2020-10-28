@@ -171,7 +171,7 @@ class Car:
         # Run Track Angle PID
         self = self.track_angle_controller.getControlsFromPID(self, track_angle, self.estimated_sample_time)
 
-        self.waypoints.recordRaceWaypoint(self, self.sample_time)
+        self.waypoints.recordRaceWaypoint(self)
 
         # Send controls to simulation
         self.setControls()
@@ -224,7 +224,7 @@ class Car:
         # Send controls to simulation
         self.setControls()
 
-        self.waypoints.recordRaceWaypoint(self, self.sample_time)
+        self.waypoints.recordRaceWaypoint(self)
 
         # Show PIDs
         if self.show_pid:

@@ -8,7 +8,9 @@ from rdp import rdp
 # Load recorded racing waypoints from file
 waypoints_correction = [0, 0]
 waypoints = planning.Waypoints("")
-waypoints.loadWaypointsFromFile("run-fast4-new.pickle")
+#waypoints.loadWaypointsFromFile("last-race.pickle")
+waypoints.loadWaypointsFromFile("run-fast4-old.pickle")
+
 waypoints_x, waypoints_y, waypoints_v = waypoints.waypointsToLists(waypoints_correction)
 
 
