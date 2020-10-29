@@ -172,6 +172,59 @@ class PathPlanner:
         self.axs = []
         self.lc = []
 
+
+    def load_reference_profile(self, race_csv = "race.csv"):
+        """
+         Build the reference profile using the CSV recorded waypoints position and speed
+
+        :param race_csv: csv file with ("id, x, y, v, newx, newy")
+        :return: None
+        """
+
+        if os.path.isfile(race_csv):
+            race_x = []
+            race_y = []
+            race_v = []
+
+            with open(race_csv) as csv_file:
+                csv_reader = csv.reader(csv_file, delimiter=',')
+                line_count = 0
+                for row in csv_reader:
+                    if line_count == 0:
+                        print(f'Column names are {", ".join(row)}')
+                    else:
+                        print(f'\t id: {row[0]} x: {row[1]} y:{row[2]} v:{row[3]} newx:{row[5]} newy:{row[6]}')
+                        race_x.append(row[5])
+                        race_y.append(row[6])
+                        race_v.append(row[3])
+                    line_count += 1
+                print(f'Processed {line_count} lines.')
+            print(str(len(race_x)) + " points")
+            # Set the reference profile
+            self.reference_profile_waypoints_x = np.array(race_x, dtype=np.float32)
+            self.reference_profile_waypoints_y = np.array(race_y, dtype=np.float32)
+            self.reference_profile_waypoints_v = np.array(race_v, dtype=np.float32)
+
+            # Set the reference profile
+            self.reference_profile_waypoints_x = self.recorded_waypoints_x[mask]
+            self.reference_profile_waypoints_y = self.recorded_waypoints_y[mask]
+            self.reference_profile_waypoints_v = self.recorded_waypoints_v[mask]
+
+            # Compute displacements between consecutive waypoints
+            reference_profile_waypoints_dx = self.reference_profile_waypoints_x - \
+                                            np.roll(self.reference_profile_waypoints_x, 1)
+            reference_profile_waypoints_dy = self.reference_profile_waypoints_y - \
+                                            np.roll(self.reference_profile_waypoints_y, 1)
+
+            # Compute line segments lengths and orientations
+            self.reference_profile_waypoints_d = np.hypot(reference_profile_waypoints_dx, reference_profile_waypoints_dy)
+            self.reference_profile_waypoints_a = np.arctan2(reference_profile_waypoints_dy, reference_profile_waypoints_dx)
+            self.reference_profile_waypoints_d[0] = 100.0
+            self.reference_profile_waypoints_a[0] = -math.pi
+            # Reset auxiliary indexes
+            self.initial_search_index = 0
+            self.last_waypoint_index = 0
+
     def update_reference_profile_from_recorded_waypoints(self, recorded_waypoints_x, recorded_waypoints_y,
                                                          recorded_waypoints_v):
         """
