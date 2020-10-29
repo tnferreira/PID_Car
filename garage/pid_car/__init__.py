@@ -51,6 +51,7 @@ class Car:
             throttle_pid_params = [0.2, 0.03, 0.08]
             steering_pid_params = [0.1, 0.00, 0.18]
 
+            
             speed_pid_params = [1.5, 0.047, 0.1]
             #speed_pid_params = [1, 0.047, 0.1]
                         
@@ -83,8 +84,8 @@ class Car:
                                                                                self.waypoints_v)
 
             # 9.5
-            self.pure_pursuit = guidance.Guidance(max_straight_track_speed=30.5,
-                                                  max_curving_speed=12.0,
+            self.pure_pursuit = guidance.Guidance(max_straight_track_speed=32.0,
+                                                  max_curving_speed=12.5,
                                                   max_turning_rate=5.0,
                                                   braking_distance=10.0)
 
