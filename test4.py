@@ -66,8 +66,8 @@ else:
   #print(reference_profile_waypoints_x)
   #exit()
   #Save csv
-  save_csv('waypoints_x_right.csv', waypoints_x_right, waypoints_y_right, waypoints_v_right)
-  save_csv('waypoints_x_left.csv', waypoints_x_left, waypoints_y_left, waypoints_v_left)
+  #save_csv('waypoints_x_right.csv', waypoints_x_right, waypoints_y_right, waypoints_v_right)
+  #save_csv('waypoints_x_left.csv', waypoints_x_left, waypoints_y_left, waypoints_v_left)
   save_csv('race.csv', reference_profile_waypoints_x, reference_profile_waypoints_y, reference_profile_waypoints_v)
 
 
@@ -114,10 +114,12 @@ axs.set_ylim(waypoints_y_left.min(), waypoints_y_left.max())
 axs.set_xlabel('x [m]')
 axs.set_ylabel('y [m]')
 
+axs.set_aspect('equal', 'box')
+axs.invert_yaxis()
+
 axs.plot(reference_profile_waypoints_x, reference_profile_waypoints_y, 'k--', marker='o', markersize=4)
 axs.plot(waypoints_x_left, waypoints_y_left, 'k-')
 axs.plot(waypoints_x_right, waypoints_y_right, 'k-')
-
 
 # Adds point index to the graphic
 sp=0.05
