@@ -431,3 +431,5 @@ class PathPlanner:
         else:
             plt.pause(0.001)
 
+    def getReferenceProfile(self):
+        return self.reference_profile_waypoints_x, self.reference_profile_waypoints_y, self.reference_profile_waypoints_v

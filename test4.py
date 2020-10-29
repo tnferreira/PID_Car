@@ -8,19 +8,23 @@ from rdp import rdp
 # Load recorded racing waypoints from file
 waypoints_correction = [0, 0]
 waypoints = planning.Waypoints("")
-
-waypoint_letf = planning.Waypoints("")
-waypoint_right = planning.Waypoints("")
+waypoints_left = planning.Waypoints("")
+waypoints_right = planning.Waypoints("")
 
 #waypoints.loadWaypointsFromFile("last-race.pickle")
-waypoints.loadWaypointsFromFile("run-fast4-old.pickle")
-waypoint_letf.loadWaypointsFromFile("run-fast4-borda-esquerda.pickle")
-waypoint_right.loadWaypointsFromFile("run-fast4-borda-direita.pickle")
+waypoints.loadWaypointsFromFile("last-race-1.pickle")
+#waypoints.loadWaypointsFromFile("run-fast4-old.pickle")
+waypoints_left.loadWaypointsFromFile("run-fast4-borda-esquerda.pickle")
+waypoints_right.loadWaypointsFromFile("run-fast4-borda-direita.pickle")
 
-waypoints_x_right, waypoint_y_right,  waypoint_v_right=  waypoint_right.waypointsToLists(waypoints_correction)
-waypoints_x_left, waypoint_y_left, waypoint_v_left =  waypoint_letf.waypointsToLists(waypoints_correction)
+waypoints_x_right, waypoints_y_right,  waypoints_v_right = waypoints_right.waypointsToLists(waypoints_correction)
+waypoints_x_left, waypoints_y_left, waypoints_v_left = waypoints_left.waypointsToLists(waypoints_correction)
 
 waypoints_race_x, waypoints_race_y, waypoints_race_v = waypoints.waypointsToLists(waypoints_correction)
+
+path_planner = planning.PathPlanner(epsilon=0.25, sample_time=0.1, number_samples=500, min_distance=6)
+path_planner.update_reference_profile_from_recorded_waypoints(waypoints_race_x, waypoints_race_y, waypoints_race_v)
+reference_profile_waypoints_x, reference_profile_waypoints_y, reference_profile_waypoints_v = path_planner.getReferenceProfile()
 
 
 """
@@ -34,15 +38,15 @@ points_race = np.array([waypoints_race_x, waypoints_race_y ]).T.reshape(-1, 1, 2
 
 segments_race = np.concatenate([points_race[:-1], points_race[1:]], axis=1)
 
-waypoints_race_v = np.array(waypoints_race_v)
 waypoints_race_x = np.array(waypoints_race_x)
 waypoints_race_y = np.array(waypoints_race_y)
+waypoints_race_v = np.array(waypoints_race_v)
 
-waypoint_y_left = np.array(waypoint_y_left)
 waypoints_x_left = np.array(waypoints_x_left)
+waypoints_y_left = np.array(waypoints_y_left)
 
-waypoint_y_left = np.array(waypoint_y_left)
-waypoint_y_right = np.array(waypoint_y_right)
+waypoints_x_right = np.array(waypoints_x_right)
+waypoints_y_right = np.array(waypoints_y_right)
 
 # Create two axis
 
@@ -61,14 +65,15 @@ fig.colorbar(line, ax=axs)
 
 # Plot recorded position profile
 
-axs.set_xlim(waypoints_race_x.min(), waypoints_race_x.max())
-axs.set_ylim(waypoints_race_y.min(), waypoints_race_y.max())
+axs.set_xlim(waypoints_x_left.min(), waypoints_x_left.max())
+axs.set_ylim(waypoints_y_left.min(), waypoints_y_left.max())
 
 axs.set_xlabel('x [m]')
 axs.set_ylabel('y [m]')
 
-axs.plot(waypoints_x_left, waypoint_y_left, 'k--')
-axs.plot(waypoints_x_right, waypoint_y_right, 'k--')
+axs.plot(reference_profile_waypoints_x, reference_profile_waypoints_y, 'k--', marker='o', markersize=4)
+axs.plot(waypoints_x_left, waypoints_y_left, 'k-')
+axs.plot(waypoints_x_right, waypoints_y_right, 'k-')
 
 plt.show()
 
