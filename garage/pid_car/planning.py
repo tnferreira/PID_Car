@@ -1,7 +1,7 @@
 ##########################################
 ### Skoods.org -> Self-Racing Car Team ###
 ##########################################
-
+import csv
 import os, time, pickle, airsim, math
 from pynput import keyboard # Run $pip install pynput in the Anaconda prompt
 from skoods import utils
@@ -172,8 +172,7 @@ class PathPlanner:
         self.axs = []
         self.lc = []
 
-
-    def load_reference_profile(self, race_csv = "race.csv"):
+    def load_reference_profile(self, race_csv="race.csv"):
         """
          Build the reference profile using the CSV recorded waypoints position and speed
 

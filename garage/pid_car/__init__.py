@@ -10,7 +10,11 @@ from plot import Plot
 
 class Car:
     def __init__(self, client, sample_time, car_name, mode_input, waypoints_correction=[0, 0],
-                 filename='something.pickle', compute_sample_time=False, show_profile=False, show_pid=False):
+                 filename='something.pickle',
+                 compute_sample_time=False,
+                 race_csv="",
+                 show_profile=False,
+                 show_pid=False):
         """
         Default constructor.
         :param client: AirSim client
@@ -20,6 +24,7 @@ class Car:
         :param waypoints_correction: X-Y waypoints correction
         :param filename: name of the file containing the recorded waypoints
         :param compute_sample_time: a flag to indicate whether the sample time shall be estimated or not
+        :param race_csv: a CSV file describing the race segments
         :param show_profile: flag to enable the reference profile and vehicle trajectory visualization
         :param show_pid: flag to enable the PID controller input / output visualization
         """
@@ -30,6 +35,7 @@ class Car:
         self.waypoints_correction = waypoints_correction
         self.waypoints = planning.Waypoints(self.name) # Initialize waypoints object
         self.filename = filename
+        self.race_csv = race_csv
         self.race_time = 0.0
         self.race_time_delta = sample_time
         self.min_speed = 2.0  # meters per second
@@ -46,18 +52,17 @@ class Car:
             self.resetControls() # Initialize controls
 
             ### INITIALIZE PID CONTROLLER PARAMETERS
-            #throttle_pid_params = [0.2, 0.03, 0.08] #best values ~20m/s
-            #steering_pid_params = [0.1, 0.00, 0.18] #best values ~20m/s
+            # throttle_pid_params = [0.2, 0.03, 0.08] #best values ~20m/s
+            # steering_pid_params = [0.1, 0.00, 0.18] #best values ~20m/s
             throttle_pid_params = [0.2, 0.03, 0.08]
             steering_pid_params = [0.1, 0.00, 0.18]
 
             
             speed_pid_params = [1.5, 0.047, 0.1]
-            #speed_pid_params = [1, 0.047, 0.1]
+            # speed_pid_params = [1, 0.047, 0.1]
                         
             track_angle_pid_params = [2.3, 0.02, 0.1]
-            #track_angle_pid_params = [0.99, 0.00, 0.1]
-
+            # track_angle_pid_params = [0.99, 0.00, 0.1]
 
             # Lower and upper control limits
             throttle_limits = [-1.0, 1.0]
@@ -79,9 +84,12 @@ class Car:
                                                      sample_time=self.sample_time,
                                                      number_samples=500,
                                                      min_distance=10)
-            self.path_planner.update_reference_profile_from_recorded_waypoints(self.waypoints_x,
-                                                                               self.waypoints_y,
-                                                                               self.waypoints_v)
+            if not self.race_csv:
+                self.path_planner.load_reference_profile(self, race_csv=self.race_csv) # Use the CSV instead
+            else:
+                self.path_planner.update_reference_profile_from_recorded_waypoints(self.waypoints_x,
+                                                                                   self.waypoints_y,
+                                                                                   self.waypoints_v)
 
             # 9.5
             self.pure_pursuit = guidance.Guidance(max_straight_track_speed=32.0,
@@ -120,10 +128,10 @@ class Car:
     def loadWaypointsFromFile(self):
         self.waypoints.loadWaypointsFromFile(filename=self.filename)
 
-    def recordWaypointsToFile(self, sample_time = 0.005):
-        self.waypoints.recordWaypointsToFile(self, sample_time, filename = self.filename)
+    def recordWaypointsToFile(self, sample_time=0.005):
+        self.waypoints.recordWaypointsToFile(self, sample_time, filename=self.filename)
 
-    def saveRaceToFile(self, filename = "lastrace.pickle"):
+    def saveRaceToFile(self, filename="lastrace.pickle"):
         self.waypoints.saveRecordedRaceToFile(filename)
 
     def updateTrajectory(self):
@@ -132,9 +140,9 @@ class Car:
     def updateControls(self):
         # Define sample time dynamicaly
         self.throttle_controller.pid_controller.setSampleTime(self.race_time_delta)
-        #print(self.throttle_controller.pid_controller.sample_time)
+        # print(self.throttle_controller.pid_controller.sample_time)
         self.steering_controller.pid_controller.setSampleTime(self.race_time_delta)
-        #print(self.steering_controller.pid_controller.sample_time)
+        # print(self.steering_controller.pid_controller.sample_time)
 
         # Run Throttle PID
         keep_racing_throttle = self.throttle_controller.setTargetValue(self, self.waypoints_x, self.waypoints_y, self.waypoints_v) # Set goal each interaction, as speed target will change
