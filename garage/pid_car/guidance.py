@@ -76,6 +76,9 @@ class Guidance:
 
         if curr_segment_d <= self.min_segment_length:
             speed_set_point = self.max_curving_speed
+            if speed_set_point < next_waypoint_v:
+                speed_set_point = next_waypoint_v
+            
         elif curr_segment_d >= self.max_segment_length:
             speed_set_point = self.max_straight_track_speed
         else:
@@ -84,6 +87,8 @@ class Guidance:
                               (self.max_straight_track_speed - self.max_curving_speed) + self.max_curving_speed
         # print("speed sp: " + str(speed_set_point))
 
+        
+            
         # Speed set point smoother
         if self.last_speed_set_point_init:
             speed_set_point = self.speed_set_point_update_rate * speed_set_point +\
