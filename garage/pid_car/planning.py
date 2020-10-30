@@ -192,10 +192,15 @@ class PathPlanner:
                     if line_count == 0:
                         print(f'Column names are {", ".join(row)}')
                     else:
-                        print(f'\t id: {row[0]} x: {row[1]} y:{row[2]} v:{row[3]} newx:{row[5]} newy:{row[6]}')
-                        race_x.append(row[5])
-                        race_y.append(row[6])
+                        print(f'Column {", ".join(row)}')
+                        #print(f'\t id: {row[0]} x: {row[1]} y:{row[2]} v:{row[3]} newx:{row[5]} newy:{row[6]}')
+#                        print(f'\t id: {row[0]} x: {row[1]} y:{row[2]} v:{row[3]}')
+#                        race_x.append(row[5])
+#                        race_y.append(row[6])
+                        race_x.append(row[1])
+                        race_y.append(row[2])
                         race_v.append(row[3])
+                        
                     line_count += 1
                 print(f'Processed {line_count} lines.')
             print(str(len(race_x)) + " points")
@@ -204,10 +209,6 @@ class PathPlanner:
             self.reference_profile_waypoints_y = np.array(race_y, dtype=np.float32)
             self.reference_profile_waypoints_v = np.array(race_v, dtype=np.float32)
 
-            # Set the reference profile
-            self.reference_profile_waypoints_x = self.recorded_waypoints_x[mask]
-            self.reference_profile_waypoints_y = self.recorded_waypoints_y[mask]
-            self.reference_profile_waypoints_v = self.recorded_waypoints_v[mask]
 
             # Compute displacements between consecutive waypoints
             reference_profile_waypoints_dx = self.reference_profile_waypoints_x - \

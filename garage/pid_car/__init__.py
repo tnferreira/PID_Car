@@ -7,6 +7,7 @@ from garage.pid_car import localization, planning, control, guidance
 import numpy as np
 from airsim import utils
 from plot import Plot
+import csv
 
 class Car:
     def __init__(self, client, sample_time, car_name, mode_input, waypoints_correction=[0, 0],
@@ -84,15 +85,17 @@ class Car:
                                                      sample_time=self.sample_time,
                                                      number_samples=500,
                                                      min_distance=10)
-            if not self.race_csv:
-                self.path_planner.load_reference_profile(self, race_csv=self.race_csv) # Use the CSV instead
+            if self.race_csv:
+                print("Using CSV")
+                self.path_planner.load_reference_profile(self.race_csv) # Use the CSV instead
             else:
+                print("Using Pickle")
                 self.path_planner.update_reference_profile_from_recorded_waypoints(self.waypoints_x,
                                                                                    self.waypoints_y,
                                                                                    self.waypoints_v)
 
             # 9.5
-            self.pure_pursuit = guidance.Guidance(max_straight_track_speed=32.0,
+            self.pure_pursuit = guidance.Guidance(max_straight_track_speed=35.0,
                                                   max_curving_speed=12.5,
                                                   max_turning_rate=5.0,
                                                   braking_distance=10.0)
@@ -126,6 +129,7 @@ class Car:
         self.behavior.setCarBehavior()
 
     def loadWaypointsFromFile(self):
+        print("loadWaypointsFromFile: filename = " + self.filename)
         self.waypoints.loadWaypointsFromFile(filename=self.filename)
 
     def recordWaypointsToFile(self, sample_time=0.005):
