@@ -29,8 +29,8 @@ class Guidance:
         #self.track_angle_set_point_update_rate = 0.95
         self.track_angle_set_point_update_rate = 0.2
 
-        self.min_segment_length = 10.0
-        self.max_segment_length = 90.0
+        self.min_segment_length = 20.0
+        self.max_segment_length = 70.0
 
 
     def update_control_targets(self, current_vehicle_position_x, current_vehicle_position_y, current_vehicle_speed,
