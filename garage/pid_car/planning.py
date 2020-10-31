@@ -373,7 +373,7 @@ class PathPlanner:
                 nearest_waypoint_index += 1
 
         # Check end of waypoints index
-        if nearest_waypoint_index >= length - 2:
+        if nearest_waypoint_index >= length - 1:
             self.initial_search_index = 0
         else:
             self.initial_search_index = nearest_waypoint_index
