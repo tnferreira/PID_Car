@@ -26,7 +26,7 @@ speedy = True
 #                      compute_sample_time=True, race_csv='run-fast4-old.csv', show_profile=False, show_pid=False)  # Give the car the name you want
 
 art_car = pid_car.Car(race.client, race.sample_time, 'SetCarName1', race.mode_input, filename='last-race-1.pickle',
-                      compute_sample_time=True, race_csv='race-file-1_tun.csv', show_profile=False, show_pid=False)  # Give the car the name you want
+                      compute_sample_time=True, race_csv='race-file-1_tun.csv', show_profile=False, show_pid=True)  # Give the car the name you want
 
 cars = [art_car]
 

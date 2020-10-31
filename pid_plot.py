@@ -113,7 +113,7 @@ class Plot:
                 ax.set_xlim(self.x.min(), self.x.max())
 
         self.fig1_axs[0].set_ylabel('Speed')
-        self.fig1_axs[0].set_ylim([0.0, 30.0])
+        self.fig1_axs[0].set_ylim([0.0, 40.0])
 
         self.fig1_axs[1].set_ylabel('Gear')
         self.fig1_axs[1].set_ylim([-1., 4])

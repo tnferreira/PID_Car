@@ -155,7 +155,8 @@ class PIDSpeedControl(PIDControl):
         :param limits: PID control signals bounds
         """
         PIDControl.__init__(self, car, pid_params, sample_time, limits)
-
+        self.pid_controller.setWindup(5)
+        
     def getControlsFromPID(self, car, target_speed, delta_time=[]):
         """
         Compute PID control signals.

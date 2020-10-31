@@ -77,7 +77,7 @@ class Car:
             self.steering_controller.setTargetValue()  # It's always zero (different from Throttle PID)
 
             self.speed_controller = control.PIDSpeedControl(self, speed_pid_params, self.sample_time,
-                                                            throttle_limits)
+                                                            throttle_limits)                              
             self.track_angle_controller = control.PIDTrackAngleControl(self, track_angle_pid_params, self.sample_time,
                                                                        steering_limits)
 
@@ -95,7 +95,7 @@ class Car:
                                                                                    self.waypoints_v)
 
             # 9.5
-            self.pure_pursuit = guidance.Guidance(max_straight_track_speed=35.0,
+            self.pure_pursuit = guidance.Guidance(max_straight_track_speed=40,
                                                   max_curving_speed=12.5,
                                                   max_turning_rate=5.0,
                                                   braking_distance=10.0)
